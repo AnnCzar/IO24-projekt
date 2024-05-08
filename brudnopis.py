@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+import math
 
 
 def get_unique(c):
@@ -53,12 +54,23 @@ def get_points():
 
     landmark_connections.update(additional_connections)
     landmarks = get_unique(landmark_connections)
-
     return landmark_connections, landmarks
 
 
 landmark_connections, landmarks = get_points()
 cap = cv2.VideoCapture(0)
+
+def calculate_distance(landmark_points):
+    x_center, y_center = face_center(landmark_points)
+
+    # dictionary - the key is the index of a point, value is its distance from the center
+    distances = {}
+    for landmark_list in landmark_points:
+        for landmark in landmark_list:
+            landmark_index, x_landmark, y_landmark = landmark
+            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
+            distances[landmark_index] = distance
+    return distances
 
 with mp_face_mesh.FaceMesh(static_image_mode=True, refine_landmarks=True) as face_mesh:
     while True:
@@ -90,14 +102,18 @@ with mp_face_mesh.FaceMesh(static_image_mode=True, refine_landmarks=True) as fac
 
                 x_center, y_center = face_center(land_list)
                 print(x_center, y_center)
+
+                #printing the distances of the points from the center of the face
+                distances = calculate_distance(land_list)
+                print(distances)
                 # in the final project, landmarks will not be drawn on the recording, but for now, I'm leaving this part
 
-                # cv2.circle(img, (int(x_center * img.shape[1]), int(y_center * img.shape[0])), 2, (255, 0, 0), -1)
-                # for index in landmarks:
-                #     cv2.circle(img, (d[index][0], d[index][1]), 2, (0, 255, 0), -1)
-                # for conn in list(landmark_connections):
-                #     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
-                #              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
+                cv2.circle(img, (int(x_center * img.shape[1]), int(y_center * img.shape[0])), 2, (255, 0, 0), -1)
+                for index in landmarks:
+                    cv2.circle(img, (d[index][0], d[index][1]), 2, (0, 255, 0), -1)
+                for conn in list(landmark_connections):
+                    cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
+                             (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
         cv2.imshow('frame', cv2.flip(img, 1))
 
