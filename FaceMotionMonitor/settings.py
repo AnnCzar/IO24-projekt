@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'FaceMotionMonitorApp.apps.FacemotionmonitorappConfig'
+    'FaceMotionMonitorApp.apps.FacemotionmonitorappConfig',
 ]
 
 MIDDLEWARE = [

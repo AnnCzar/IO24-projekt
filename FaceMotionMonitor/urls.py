@@ -17,6 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from FaceMotionMonitorApp.views import UserRegistration, LoginView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('register/', UserRegistration.as_view(), name='register-user'),
+    path('login/', LoginView.as_view(), name='login'),
 ]
