@@ -21,11 +21,6 @@ class Doctor(models.Model):
     pwz_pwzf = models.CharField(max_length=10, unique=True)
     user_id = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
 
-class RefPhotos(models.Model):
-    id = models.AutoField(primary_key=True)
-    date = models.DateTimeField()
-    x_center = models.FloatField()
-    y_center = models.FloatField()
 
 class Patient(models.Model):
     id = models.AutoField(primary_key=True)
@@ -33,7 +28,13 @@ class Patient(models.Model):
     date_of_diagnosis = models.DateField()
     sex = models.CharField(max_length=10, choices=[(sex.value, sex.name) for sex in Sex])
     user_id = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
-    ref_photo = models.OneToOneField(RefPhotos, on_delete=models.CASCADE)
+
+class RefPhotos(models.Model):
+    id = models.AutoField(primary_key=True)
+    date = models.DateTimeField()
+    x_center = models.FloatField()
+    y_center = models.FloatField()
+    patient_id = models.OneToOneField(Patient, on_delete=models.CASCADE, null=True)
 
 class DoctorAndPatient(models.Model):
 

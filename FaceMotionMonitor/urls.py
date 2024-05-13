@@ -16,13 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import TemplateView
 
-from FaceMotionMonitorApp.views import UserRegistration, LoginView
+from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', UserRegistration.as_view(), name='register-user'),
+    path('register/', DoctorRegistration.as_view(), name='register-user'),
+    path('addPatient/', AddPatient.as_view(), name='add-patient'),
     path('login/', LoginView.as_view(), name='login'),
+
     path('', TemplateView.as_view(template_name='index.html')),
 
 ]
+
