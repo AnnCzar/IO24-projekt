@@ -4,12 +4,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(400px);
+  transform: translateY(300px);
 }
-/*.registratiom-form input[type="text"],*/
-/*.registration-form input[type="password"] {*/
-/*  font-size: 30px;*/
-/*}*/
 
 .registration-form button {
   font-size: 25px;
@@ -17,10 +13,12 @@
   margin-bottom: 20px;
 }
 
-.background{
+.background {
   background-image: url('../images/background.svg');
-  background-size: cover;
-  /*background-repeat: no-repeat;*/
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 60px);
 }
 .header {
   color: white;

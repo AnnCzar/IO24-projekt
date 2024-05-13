@@ -1,0 +1,112 @@
+.examination {
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(300px);
+}
+
+
+.background {
+  background-image: url('../images/background.svg');
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 60px);
+}
+
+.examination button {
+    font-size: 2rem;
+    margin-top: 2rem;
+}
+.webcam-container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.webcam-container video {
+  width: 100%;
+  height: auto;
+}
+
+.header {
+  color: white;
+  transform: translateY(150px);
+  font-style: revert;
+  font-size: 70px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+
+}
+.myButton {
+  position: fixed;
+  top: 20px;
+  flex-direction: column;
+  left: 20px;
+  z-index: 9999;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  fill: black;
+}
+
+.myButton svg {
+  width: 50px;
+  height: 50px;
+  fill: currentColor;
+}
+
+.myButton span {
+  margin-top: 5px;
+  font-size: 20px;
+}
+
+.myButton:hover {
+  background-color: #f0f0f0;
+}
+
+.reportsButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  width: 120px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.reportsButton .icon {
+  width: 60px;
+  height: 60px;
+  fill: black;
+}
+
+.reportsButton span {
+  margin-top: 5px;
+  font-size: 20px;
+}
+
+.reportsButton:hover {
+  background-color: #f0f0f0;
+  color: black;
+}
+
+
+
+
+
+
+

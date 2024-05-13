@@ -10,9 +10,10 @@ interface FormValues {
   name: string;
   surname: string;
   pesel: string;
+  pwz: string;
 }
 
-function RegistrationForm() {
+function RegistrationFormD() {
   const onSubmit = useCallback(
     (values: FormValues, formik: any) => {
       console.log(values);
@@ -66,7 +67,9 @@ function RegistrationForm() {
               onBlur={formik.handleBlur}
               error={formik.touched.name && !!formik.errors.name}
               helperText={formik.touched.name && formik.errors.name}
-              InputLabelProps={{ style: { fontSize: '25px' } }}
+              InputLabelProps={{ style: { fontSize: '30px' } }}
+              InputProps={{ style: { fontSize: '30px' } }}
+
             />
                <TextField
               id="surname"
@@ -77,7 +80,8 @@ function RegistrationForm() {
               onBlur={formik.handleBlur}
               error={formik.touched.surname && !!formik.errors.surname}
               helperText={formik.touched.surname && formik.errors.surname}
-              InputLabelProps={{ style: { fontSize: '25px' } }}
+              InputLabelProps={{ style: { fontSize: '30px' } }}
+              InputProps={{ style: { fontSize: '30px' } }}
             />
             <TextField
               id="username"
@@ -88,7 +92,8 @@ function RegistrationForm() {
               onBlur={formik.handleBlur}
               error={formik.touched.username && !!formik.errors.username}
               helperText={formik.touched.username && formik.errors.username}
-              InputLabelProps={{ style: { fontSize: '25px' } }}
+              InputLabelProps={{ style: { fontSize: '30px' } }}
+              InputProps={{ style: { fontSize: '30px' } }}
             />
             <TextField
               id="password"
@@ -100,7 +105,8 @@ function RegistrationForm() {
               onBlur={formik.handleBlur}
               error={formik.touched.password && !!formik.errors.password}
               helperText={formik.touched.password && formik.errors.password}
-              InputLabelProps={{ style: { fontSize: '25px' } }}
+              InputLabelProps={{ style: { fontSize: '30px' } }}
+              InputProps={{ style: { fontSize: '30px' } }}
             />
 
             <TextField
@@ -112,7 +118,8 @@ function RegistrationForm() {
               onBlur={formik.handleBlur}
               error={formik.touched.pesel && !!formik.errors.pesel}
               helperText={formik.touched.pesel && formik.errors.pesel}
-              InputLabelProps={{ style: { fontSize: '25px' } }}
+              InputLabelProps={{ style: { fontSize: '30px' } }}
+              InputProps={{ style: { fontSize: '30px' } }}
             />
 
             <TextField
@@ -124,7 +131,8 @@ function RegistrationForm() {
               onBlur={formik.handleBlur}
               error={formik.touched.pwz && !!formik.errors.pwz}
               helperText={formik.touched.pwz && formik.errors.pwz}
-              InputLabelProps={{ style: { fontSize: '25px' } }}
+              InputLabelProps={{ style: { fontSize: '30px' } }}
+              InputProps={{ style: { fontSize: '30px' } }}
             />
 
             <Button
@@ -142,4 +150,4 @@ function RegistrationForm() {
   );
 }
 
-export default RegistrationForm;
+export default RegistrationFormD;
