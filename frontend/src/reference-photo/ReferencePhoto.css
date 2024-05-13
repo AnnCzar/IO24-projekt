@@ -1,4 +1,4 @@
-.login-form {
+.reference-photo {
   padding: 5rem;
   display: flex;
   flex-direction: column;
@@ -6,16 +6,7 @@
   align-items: center;
   transform: translateY(300px);
 }
-.login-form input[type="text"],
-.login-form input[type="password"] {
-  font-size: 30px;
-}
 
-.login-form button {
-  font-size: 25px;
-  margin-top: 30px;
-  margin-bottom: 20px;
-}
 
 .background {
   background-image: url('../images/background.svg');
@@ -24,9 +15,24 @@
   background-position: center;
   height: calc(100vh - 60px);
 }
+
+.reference-photo button {
+    font-size: 2rem;
+    margin-top: 2rem;
+}
+.webcam-container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.webcam-container video {
+  width: 100%;
+  height: auto;
+}
+
 .header {
   color: white;
-  transform: translateY(190px);
+  transform: translateY(150px);
   font-style: revert;
   font-size: 70px;
   font-weight: bold;

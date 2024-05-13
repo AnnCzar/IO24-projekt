@@ -3,7 +3,7 @@ import { Button, Link, TextField } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import "./LoginForm.css";
-import RegistrationForm from "../registration-form/RegistrationForm";
+import RoleChoice from "../role-choice/RoleChoice";
 
 interface FormValues {
   username: string;
@@ -11,7 +11,7 @@ interface FormValues {
 }
 
 function LoginForm() {
-  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [showRoleChoice, setShowRoleChoice] = useState(false);
 
   const onSubmit = useCallback((values: FormValues, formik: any) => {
     console.log(values);
@@ -30,13 +30,13 @@ function LoginForm() {
   );
 
   const handleRegistrationLinkClick = () => {
-    setShowRegistrationForm(true);
+    setShowRoleChoice(true);
   };
 
   return (
     <div className="background">
-      {showRegistrationForm ? (
-        <RegistrationForm />
+      {showRoleChoice ? (
+        <RoleChoice />
       ) : (
         <div>
           <header className="header">SIGN IN</header>
@@ -65,7 +65,7 @@ function LoginForm() {
                   helperText={
                     formik.touched.username && formik.errors.username
                   }
-                  InputLabelProps={{ style: { fontSize: "25px" } }} // Adjust the font size here
+                  InputLabelProps={{ style: { fontSize: "25px" } }}
                 />
                 <TextField
                   id="password"
@@ -79,7 +79,7 @@ function LoginForm() {
                   helperText={
                     formik.touched.password && formik.errors.password
                   }
-                  InputLabelProps={{ style: { fontSize: "25px" } }} // Adjust the font size here
+                  InputLabelProps={{ style: { fontSize: "25px" } }}
                 />
 
                 <Button
