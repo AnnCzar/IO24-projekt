@@ -56,6 +56,85 @@ class DoctorRegistration(views.APIView):
 
 
 
+class AddPatient(APIView):
+
+    #TODO add data validation (if pesel is in DB, check if the user is the patient)
+    def post(self, request):
+
+        role_vale = Role['PATIENT'].value
+        pesel = request.data['pesel']
+
+        if UserProfile.objects.filter(pesel=pesel).exists():
+            user_profile = UserProfile.objects.get(pesel=pesel)
+            user_id = user_profile.id
+            patient = Patient.objects.get(user_id=user_id)
+            patient_id = patient.id
+            print(type(patient_id))
+            try:
+                idf = int(request.data['doctor_id'])
+            except ValueError:
+                return Response({"error": "Nieprawidłowy doctor_id"}, status=status.HTTP_400_BAD_REQUEST)
+            patient_and_doctor_data = {
+                'doctor_id': idf,  # to change - get if from info about session?
+                'patient_id': patient_id
+            }
+            print(type(idf))
+
+            patient_doctor_serializer = DoctorAndPatientSerializer(data=patient_and_doctor_data)
+
+            if patient_doctor_serializer.is_valid():
+                patient_doctor = patient_doctor_serializer.save()
+                return Response('Patient added', status=status.HTTP_201_CREATED)
+            else:
+                return Response(patient_doctor_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            user_profile_serializer = UserProfileSerializer(data=request.data)
+            if user_profile_serializer.is_valid():
+                user_profile = user_profile_serializer.save()
+
+                auth_data = {
+                    'login': 'null',
+                    'password': 'null',
+                    'role': role_vale,
+                    'id': user_profile.id  # Assuming user profile ID is used in Auth
+                }
+
+                patient_data = {
+                    'date_of_birth': request.data['date_of_birth'],
+                    'date_of_diagnosis': request.data['date_of_diagnosis'],
+                    'sex': Sex[request.data['sex']].value,
+                    'user_id': user_profile.id
+                }
+
+                auth_serializer = AuthSerializer(data=auth_data)
+
+                patient_serializer = PatientSerializer(data=patient_data)
+
+                if patient_serializer.is_valid():
+
+                    patient_serializer.save()
+
+                    patient_and_doctor_data = {
+                        'doctor_id': request.data['doctor_id'],  # to change - get if from info about session?
+                        'patient_id': patient_serializer.data['id']
+                    }
+                    patient_doctor_serializer = DoctorAndPatientSerializer(data=patient_and_doctor_data)
+                    if auth_serializer.is_valid() and patient_doctor_serializer.is_valid():
+                        auth_serializer.save()
+                        patient_doctor_serializer.save()
+
+
+                        return Response('Patient added', status=status.HTTP_201_CREATED)
+                    else:
+                        return Response(auth_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                else:
+                    return Response(auth_serializer.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(user_profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 #
 #
