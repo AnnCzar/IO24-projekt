@@ -18,15 +18,17 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 
-from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration
+from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
+    video_stream, start_video_processing
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', DoctorRegistration.as_view(), name='register-doctor'),
     path('addPatient/', AddPatient.as_view(), name='add-patient'),
     path('registerPatient/', PatientRegistration.as_view(), name='register-patient'),
-
     path('login/', LoginView.as_view(), name='login'),
+    path('video-stream/', video_stream, name='video_stream'),
+    path('start-video-processing/', start_video_processing, name='start_video_processing'),
 
     path('', TemplateView.as_view(template_name='index.html')),
 

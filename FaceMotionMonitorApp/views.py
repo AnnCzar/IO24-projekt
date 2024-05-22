@@ -1,9 +1,12 @@
 from django.contrib.auth.hashers import make_password
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpResponse
 from rest_framework import views
+from rest_framework.decorators import api_view
 
+from .ai_model.brudnopis import VideoProcessor
 from .backends.auth_backend import AuthBackend
-from .models import Role, Sex
+from .models import Role, Sex, UserProfile
+from .models.userProfile_models import Patient, Doctor, Auth, DoctorAndPatient
 from .serializers import *
 from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
@@ -248,3 +251,22 @@ class LoginView(APIView):  #not working how I want - TO FIX
     #         else:
     #             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def generate_frames():
+    processor = VideoProcessor()  # call VideoProcessor class from AI model
+    while True:
+        frame = processor.process_frame()
+        if frame is None:
+            break
+        yield (b'--frame\r\n'       # returns the processed frame as a byte string
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+
+@api_view(['GET'])   # streams the video frames to the client
+def video_stream(request):
+    return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+
+@api_view(['GET'])  # just a message that recoding has started
+def start_video_processing(request):
+    return HttpResponse("Video processing started.")
