@@ -56,6 +56,8 @@ class Auth(models.Model):
     login = models.CharField(max_length=100, unique=True, null=True)
     password = models.CharField(max_length=100, null=True)
     role = models.CharField(max_length=10, choices=[(role.value, role.name) for role in Role])
+
+
 class Recordings(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField()

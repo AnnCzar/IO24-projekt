@@ -216,41 +216,31 @@ class LoginView(APIView):  #not working how I want - TO FIX
 
 
 
-    # def form_valid(self, form):
-    #     # Pobierz nazwę użytkownika i hasło z formularza
-    #     username = form.cleaned_data['username']
-    #     password = form.cleaned_data['password']
-    #
-    #     # Uwierzytelnij użytkownika
-    #     user = authenticate(username=username, password=password)
-    #     if user is not None:
-    #         # Jeśli użytkownik został uwierzytelniony, zaloguj go
-    #         login(self.request, user)
-    #         # Zapisz rolę użytkownika w sesji
-    #         self.request.session['user_role'] = user.role
-    #     return HttpResponseRedirect(self.get_success_url())
+class AddExamiantionView(views.APIView):
+    def post(self, request):
+        if 'patient_id' not in request.data:  # change it later, use session
+            return Response({'error': 'Patient ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        patient_id = request.data['patient_id']
+        try:
+            patient = UserProfile.objects.get(id=patient_id)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data
+        data['patient_id'] = patient.id
+
+        recording_serializer = RecordingsSerializer(data=data)
+        if recording_serializer.is_valid():
+            recording = recording_serializer.save()
+            return Response(recording_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(recording_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
 
-    # def post(self, request):
-    #     serializer = LoginSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         user = serializer.validated_data['user']
-    #         # Uwierzytelnienie użytkownika i rozpoczęcie sesji
-    #         django_user = authenticate(request, username=user.login, password=request.data['password'])
-    #         print(django_user)
-    #         if django_user is not None:
-    #             login(request, django_user)  # Rozpoczęcie sesji
-    #             return Response({
-    #                 'message': 'Login successful.',
-    #                 'user_id': user.id,
-    #                 'role': user.role
-    #             }, status=status.HTTP_200_OK)
-    #         else:
-    #             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def generate_frames():
     processor = VideoProcessor()  # call VideoProcessor class from AI model

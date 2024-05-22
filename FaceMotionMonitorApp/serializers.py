@@ -3,7 +3,8 @@ from rest_framework import serializers
 from django.apps import apps
 from django.contrib.auth.hashers import make_password
 from FaceMotionMonitorApp.models import UserProfile
-from FaceMotionMonitorApp.models.userProfile_models import Auth, Doctor, Patient, DoctorAndPatient
+from FaceMotionMonitorApp.models.userProfile_models import Auth, Doctor, Patient, DoctorAndPatient, Recordings, Frames, \
+    FrameLandmarks, RefPhotos, RefPhotoLandmarks, Smile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -25,12 +26,12 @@ class AuthSerializer(serializers.ModelSerializer):
         fields = ['id', 'login', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
+
 def validate_login(value):  # to check if login is taken
     if Auth.objects.filter(login=value).exists():
         raise serializers.ValidationError("Login already exists.")
     else:
         return False
-
 
 
 class AuthUpdateSerializer(serializers.ModelSerializer):
@@ -45,24 +46,12 @@ class AuthUpdateSerializer(serializers.ModelSerializer):
         if Auth.objects.filter(login=value).exists():
             raise serializers.ValidationError("Login already exists.")
         return value
+
     def update(self, instance, validated_data):
         instance.login = validated_data.get('login', instance.login)
         instance.password = make_password(validated_data.get('password', instance.password))
         instance.save()
         return instance
-
-    # def update(self, id, login1, passwor):
-    #
-    #     Auth.objects.get(id=id).login = login1
-    #     Auth.objects.get(id=id).password = passwor
-    #     Auth.objects.get(id=id).save()
-    #     return Auth.objects.get(id=id)
-    # #
-    # def validate_login(self, value):  # to check if login is taken
-    #     if Auth.objects.filter(login=value).exists():
-    #         raise serializers.ValidationError("Login already exists.")
-    #     return value
-
 
 
 class DoctorSerializer(serializers.ModelSerializer):
@@ -84,24 +73,13 @@ class PatientSerializer(serializers.ModelSerializer):
         fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'user_id']
 
 
-# class DoctorAndPatientSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = DoctorAndPatient
-#         fields = ['id', 'doctor', 'patient']
-#
 class DoctorAndPatientSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = DoctorAndPatient
         fields = ['id', 'patient_id', 'doctor_id']
     #
-    # doctor_id = serializers.IntegerField()
-    # patient_id = serializers.IntegerField()
-    #
-    # class Meta:
-    #     model = DoctorAndPatient
-    #     fields = ['id', 'doctor_id', 'patient_id']
+
+
 def validate_pesel(value):  # to check if pesel of patient is in db
     if UserProfile.objects.filter(pesel=value).exists():
         return True
@@ -127,3 +105,78 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+
+
+
+class FrameLandmarksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FrameLandmarks
+        fields = ['id', 'x_cord', 'y_cord', 'landmark_number', 'frame_id']
+
+
+class SmileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Smile
+        fields = ['id', 'left_corner_photo', 'right_corner_photo', 'left_corner', 'right_corner', 'frame_id']
+
+
+
+class FramesSerializer(serializers.ModelSerializer):
+    framelandmarks = FrameLandmarksSerializer(many=True)
+    smile = SmileSerializer()
+
+    class Meta:
+        model = Frames
+        fields = '__all__'
+
+    def create(self, validated_data):
+        landmarks_data = validated_data.pop('framelandmarks')
+        smile_data = validated_data.pop('smile')
+        frame = Frames.objects.create(**validated_data)
+
+        for landmark_data in landmarks_data:
+            FrameLandmarks.objects.create(frame=frame, **landmark_data)
+
+        Smile.objects.create(frame=frame, **smile_data)
+
+        return frame
+
+class FrameLandmarksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FrameLandmarks
+        fields = ['id', 'x_cord', 'y_cord', 'landmark_number', 'frame_id']
+
+class RecordingsSerializer(serializers.ModelSerializer):
+    frames = FramesSerializer(many=True)
+
+    class Meta:
+        model = Recordings
+        fields = '__all__'
+
+    def create(self, validated_data):
+        frames_data = validated_data.pop('frames')
+        recording = Recordings.objects.create(**validated_data)
+
+        for frame_data in frames_data:
+            landmarks_data = frame_data.pop('framelandmarks')
+            smile_data = frame_data.pop('smile')
+            frame = Frames.objects.create(recording=recording, **frame_data)
+
+            for landmark_data in landmarks_data:
+                FrameLandmarks.objects.create(frame=frame, **landmark_data)
+
+            Smile.objects.create(frame=frame, **smile_data)
+
+        return recording
+class RefPhotosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RefPhotos
+        fields = ['id', 'date', 'x_center', 'y_center', 'patient_id']
+
+
+class RefPhotoLandmarksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RefPhotoLandmarks
+        fields = ['id', 'x_cord', 'y_cord', 'landmark_number', 'ref_photo']
+
+
