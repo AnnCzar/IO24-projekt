@@ -39,8 +39,13 @@ class RefPhotos(models.Model):
 class DoctorAndPatient(models.Model):
 
     id = models.AutoField(primary_key=True)
-    patient = models.ForeignKey(Patient, related_name='patient_relations', on_delete=models.PROTECT)
-    doctor = models.ForeignKey(Doctor, related_name='doctor_relations', on_delete=models.PROTECT)
+
+    patient_id = models.IntegerField(default=1)
+    doctor_id = models.IntegerField(default=1)
+    # patient_id = models.ForeignKey(Patient, related_name='patient_relations', on_delete=models.CASCADE, null=True)
+    # doctor_id = models.ForeignKey(Doctor, related_name='doctor_relations', on_delete=models.CASCADE, null=True)
+    # patient = models.ManyToManyField(Patient, related_name='doctor_relations')
+    # doctor = models.ManyToManyField(Doctor, related_name='patient_relations')
     # def __str__(self):
     #     return f"Doctor: {self.doctor.username}, Patient: {self.patient.username}"
 
@@ -48,8 +53,8 @@ class Auth(models.Model):
 
 
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
-    login = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=100)
+    login = models.CharField(max_length=100, unique=True, null=True)
+    password = models.CharField(max_length=100, null=True)
     role = models.CharField(max_length=10, choices=[(role.value, role.name) for role in Role])
 class Recordings(models.Model):
     id = models.AutoField(primary_key=True)

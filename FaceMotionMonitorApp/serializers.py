@@ -1,7 +1,7 @@
 from django.contrib.auth.hashers import check_password
 from rest_framework import serializers
 from django.apps import apps
-
+from django.contrib.auth.hashers import make_password
 from FaceMotionMonitorApp.models import UserProfile
 from FaceMotionMonitorApp.models.userProfile_models import Auth, Doctor, Patient, DoctorAndPatient
 
@@ -25,12 +25,44 @@ class AuthSerializer(serializers.ModelSerializer):
         fields = ['id', 'login', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
-
 def validate_login(value):  # to check if login is taken
     if Auth.objects.filter(login=value).exists():
         raise serializers.ValidationError("Login already exists.")
     else:
         return False
+
+
+
+class AuthUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Auth
+        fields = ['login', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def validate_login(self, value):
+        if self.instance and self.instance.login == value:
+            return value
+        if Auth.objects.filter(login=value).exists():
+            raise serializers.ValidationError("Login already exists.")
+        return value
+    def update(self, instance, validated_data):
+        instance.login = validated_data.get('login', instance.login)
+        instance.password = make_password(validated_data.get('password', instance.password))
+        instance.save()
+        return instance
+
+    # def update(self, id, login1, passwor):
+    #
+    #     Auth.objects.get(id=id).login = login1
+    #     Auth.objects.get(id=id).password = passwor
+    #     Auth.objects.get(id=id).save()
+    #     return Auth.objects.get(id=id)
+    # #
+    # def validate_login(self, value):  # to check if login is taken
+    #     if Auth.objects.filter(login=value).exists():
+    #         raise serializers.ValidationError("Login already exists.")
+    #     return value
+
 
 
 class DoctorSerializer(serializers.ModelSerializer):
@@ -52,12 +84,24 @@ class PatientSerializer(serializers.ModelSerializer):
         fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'user_id']
 
 
+# class DoctorAndPatientSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = DoctorAndPatient
+#         fields = ['id', 'doctor', 'patient']
+#
 class DoctorAndPatientSerializer(serializers.ModelSerializer):
+
+
     class Meta:
         model = DoctorAndPatient
-        fields = ['id', 'doctor', 'patient']
-
-
+        fields = ['id', 'patient_id', 'doctor_id']
+    #
+    # doctor_id = serializers.IntegerField()
+    # patient_id = serializers.IntegerField()
+    #
+    # class Meta:
+    #     model = DoctorAndPatient
+    #     fields = ['id', 'doctor_id', 'patient_id']
 def validate_pesel(value):  # to check if pesel of patient is in db
     if UserProfile.objects.filter(pesel=value).exists():
         return True

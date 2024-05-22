@@ -18,12 +18,14 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 
-from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient
+from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', DoctorRegistration.as_view(), name='register-user'),
+    path('register/', DoctorRegistration.as_view(), name='register-doctor'),
     path('addPatient/', AddPatient.as_view(), name='add-patient'),
+    path('registerPatient/', PatientRegistration.as_view(), name='register-patient'),
+
     path('login/', LoginView.as_view(), name='login'),
 
     path('', TemplateView.as_view(template_name='index.html')),
