@@ -58,8 +58,27 @@ def face_center(points):
 
 mp_face_mesh = mp.solutions.face_mesh
 
+
+def iris_width(landmark_points):
+    left = [469, 471]
+    right = [474, 476]
+    x_landmarks = {}
+    y_landmarks = {}
+    for landmark_list in landmark_points:
+        for landmark in landmark_list:
+            landmark_index, x_landmark, y_landmark = landmark
+            if landmark_index in left or landmark_index in right:
+                x_landmarks.update({landmark_index : x_landmark})
+                y_landmarks.update({landmark_index : y_landmark})
+    left_width = math.sqrt((x_landmarks.get(469) - x_landmarks.get(471))**2 + (y_landmarks.get(469) - y_landmarks.get(471))**2)
+    right_width = math.sqrt((x_landmarks.get(474) - x_landmarks.get(476)) ** 2 + (y_landmarks.get(474) - y_landmarks.get(476)) ** 2)
+    width = (left_width + right_width)/2
+    return width
+
 def calculate_distance(landmark_points):
     x_center, y_center = face_center(landmark_points)
+    width = iris_width(landmark_points)
+    k = width/11 # 11 mm - average width of a human iris, k is a scale
 
     # dictionary - the key is the index of a point, value is its distance from the center
     distances = {}
@@ -67,8 +86,9 @@ def calculate_distance(landmark_points):
         for landmark in landmark_list:
             landmark_index, x_landmark, y_landmark = landmark
             distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
-            distances[landmark_index] = distance
-    return distances
+            distances[landmark_index] = distance*k
+    return distances   #distances in mm
+
 
 landmark_connections, landmarks = get_points()
 cap = cv2.VideoCapture(0)
@@ -103,8 +123,8 @@ with mp_face_mesh.FaceMesh(static_image_mode=True, refine_landmarks=True) as fac
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                left_iris = [468, 469, 470, 471]  # indexes of irises
-                right_iris = [473, 474, 475, 476]
+                left_iris = [468, 469, 470, 471]  # indexes of irises: 468 - top, 469 - right, 470 - bottom, 471 - left
+                right_iris = [473, 474, 475, 476] # 473 - top, 474 - right - 475 - bottom, 476 - left
 
                 for index in left_iris + right_iris:
                     x = int(lms[index].x * img.shape[1])
