@@ -20,7 +20,7 @@ from django.views.generic import TemplateView
 
 from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
     video_stream, start_video_processing, AddRecordingView, AddFrameView, AddFrameLandmarksView, AddSmileView, \
-    AddRefPhotoView, AddRefPhotoLandmarksView
+    AddRefPhotoView, AddRefPhotoLandmarksView, CapturePhotoView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +30,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('video-stream/', video_stream, name='video_stream'),
     path('start-video-processing/', start_video_processing, name='start_video_processing'),
+    path('capture-photo/', CapturePhotoView.as_view(), name='capture_photo'),  # capture the photo
 
     # paths for testing in the postman, later there will be one path ----------------
     path('addRecording/', AddRecordingView.as_view(), name='add_recording'),

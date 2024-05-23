@@ -215,7 +215,6 @@ class LoginView(APIView):  #not working how I want - TO FIX
             return Response('Nieprawidłowe dane logowania', status=400)
 
 
-
 # class AddExamiantionView(views.APIView):   #its not working, dont delete
 #     def post(self, request):
 #         if 'patient_id' not in request.data:  # change it later, use session
@@ -238,7 +237,6 @@ class LoginView(APIView):  #not working how I want - TO FIX
 #             return Response(recording_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#
 class AddRecordingView(views.APIView):  #adding info about recordings to database
     def post(self, request):
         #here add a function that divides the recording into frames?
@@ -261,7 +259,6 @@ class AddFrameView(views.APIView): #adding info about frame to database
             return Response(frames_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(frames_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class AddFrameLandmarksView(views.APIView):
@@ -287,7 +284,6 @@ class AddSmileView(views.APIView):
             return Response(smile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 def generate_frames():
     processor = VideoProcessor()  # call VideoProcessor class from AI model
     while True:
@@ -297,6 +293,14 @@ def generate_frames():
         yield (b'--frame\r\n'       # returns the processed frame as a byte string
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
+
+class CapturePhotoView(APIView):
+    def get(self, request):
+        processor = VideoProcessor()
+        _, img_bytes = processor.capture_photo()
+        if img_bytes is None:
+            return HttpResponse("Failed to capture photo.", status=500)
+        return HttpResponse(img_bytes, content_type='image/jpeg')
 
 @api_view(['GET'])   # streams the video frames to the client
 def video_stream(request):
@@ -308,9 +312,6 @@ def start_video_processing(request):
     return HttpResponse("Video processing started.")
 
 
-
-
-
 class AddRefPhotoView(views.APIView):
     def post(self, request):
         ref_photos_serializer = RefPhotosSerializer(data=request.data)
@@ -319,6 +320,7 @@ class AddRefPhotoView(views.APIView):
             return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class AddRefPhotoLandmarksView(views.APIView):
     # IDEA: merge this code with code from 'AddRefPhotoView'
