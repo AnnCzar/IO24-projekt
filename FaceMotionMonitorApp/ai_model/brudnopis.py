@@ -85,7 +85,7 @@ class VideoProcessor:
             for landmark in landmark_list:
                 landmark_index, x_landmark, y_landmark = landmark
                 distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
-                distances[landmark_index] = distance
+                distances[landmark_index] = distance / k
         return distances
 
     def process_frame(self):
