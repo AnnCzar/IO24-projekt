@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-
+import math
 
 def get_unique(c):
     unique_landmarks = set()
@@ -12,13 +12,15 @@ def get_unique(c):
     return list(unique_landmarks)
 
 mp_face_mesh = mp.solutions.face_mesh
+
 def get_points():
     connections = [
         mp_face_mesh.FACEMESH_LIPS,
         mp_face_mesh.FACEMESH_LEFT_EYEBROW,
         mp_face_mesh.FACEMESH_RIGHT_EYEBROW,
         mp_face_mesh.FACEMESH_LEFT_EYE,
-        mp_face_mesh.FACEMESH_RIGHT_EYE]
+        mp_face_mesh.FACEMESH_RIGHT_EYE,
+        mp_face_mesh.FACEMESH_IRISES]
 
 
     landmark_connections = set().union(*connections)
@@ -39,6 +41,34 @@ def get_points():
 
     return landmark_connections, landmarks
 
+def face_center(points):
+    sum_x, sum_y = 0, 0
+
+    for landmark_list in points:
+        for landmark in landmark_list:
+            landmark_index, landmark_x, landmark_y = landmark
+            sum_x += landmark_x
+            sum_y += landmark_y
+
+    center_x = sum_x / len(points[0])
+    center_y = sum_y / len(points[0])
+
+    return center_x, center_y
+
+
+mp_face_mesh = mp.solutions.face_mesh
+
+def calculate_distance(landmark_points):
+    x_center, y_center = face_center(landmark_points)
+
+    # dictionary - the key is the index of a point, value is its distance from the center
+    distances = {}
+    for landmark_list in landmark_points:
+        for landmark in landmark_list:
+            landmark_index, x_landmark, y_landmark = landmark
+            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
+            distances[landmark_index] = distance
+    return distances
 
 landmark_connections, landmarks = get_points()
 cap = cv2.VideoCapture(0)
@@ -72,6 +102,14 @@ with mp_face_mesh.FaceMesh(static_image_mode=True, refine_landmarks=True) as fac
                 for conn in list(landmark_connections):
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
+
+                left_iris = [468, 469, 470, 471]  # indexes of irises
+                right_iris = [473, 474, 475, 476]
+
+                for index in left_iris + right_iris:
+                    x = int(lms[index].x * img.shape[1])
+                    y = int(lms[index].y * img.shape[0])
+                    cv2.circle(img, (x, y), 2, (255, 0, 0), -1)
 
         cv2.imshow('frame', cv2.flip(img, 1))
 
