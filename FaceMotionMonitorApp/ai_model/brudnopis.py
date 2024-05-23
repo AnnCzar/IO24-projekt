@@ -40,7 +40,8 @@ class VideoProcessor:
             mp_face_mesh.FACEMESH_LEFT_EYEBROW,
             mp_face_mesh.FACEMESH_RIGHT_EYEBROW,
             mp_face_mesh.FACEMESH_LEFT_EYE,
-            mp_face_mesh.FACEMESH_RIGHT_EYE
+            mp_face_mesh.FACEMESH_RIGHT_EYE,
+            mp_face_mesh.FACEMESH_IRISES
         ]
         landmark_connections = set().union(*connections)
         additional_landmarks = [206, 203, 216, 212, 423, 426, 436, 432]
@@ -57,8 +58,28 @@ class VideoProcessor:
         landmarks = self.get_unique(landmark_connections)
         return landmark_connections, landmarks
 
+    def iris_width(self, landmark_points):
+        left = [469, 471]
+        right = [474, 476]
+        x_landmarks = {}
+        y_landmarks = {}
+        for landmark_list in landmark_points:
+            for landmark in landmark_list:
+                landmark_index, x_landmark, y_landmark = landmark
+                if landmark_index in left or landmark_index in right:
+                    x_landmarks.update({landmark_index: x_landmark})
+                    y_landmarks.update({landmark_index: y_landmark})
+        left_width = math.sqrt(
+            (x_landmarks.get(469) - x_landmarks.get(471)) ** 2 + (y_landmarks.get(469) - y_landmarks.get(471)) ** 2)
+        right_width = math.sqrt(
+            (x_landmarks.get(474) - x_landmarks.get(476)) ** 2 + (y_landmarks.get(474) - y_landmarks.get(476)) ** 2)
+        width = (left_width + right_width) / 2
+        return width
+
     def calculate_distance(self, landmark_points):
         x_center, y_center = self.face_center(landmark_points)
+        width = self.iris_width(landmark_points)
+        k = width / 11  # 11 mm - average width of a human iris, k is a scale
         distances = {}
         for landmark_list in landmark_points:
             for landmark in landmark_list:
