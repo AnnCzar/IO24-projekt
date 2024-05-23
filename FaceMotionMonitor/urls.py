@@ -19,7 +19,8 @@ from django.urls import path
 from django.views.generic import TemplateView
 
 from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
-    video_stream, start_video_processing, AddExamiantionView
+    video_stream, start_video_processing, AddRecordingView, AddFrameView, AddFrameLandmarksView, AddSmileView, \
+    AddRefPhotoView, AddRefPhotoLandmarksView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,7 +30,17 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('video-stream/', video_stream, name='video_stream'),
     path('start-video-processing/', start_video_processing, name='start_video_processing'),
-    path('examination/', AddExamiantionView.as_view(), name='add_examination'),
+
+    # paths for testing in the postman, later there will be one path ----------------
+    path('addRecording/', AddRecordingView.as_view(), name='add_recording'),
+    path('addFrame/', AddFrameView.as_view(), name='add_frame'),
+    path('addLandmarks/', AddFrameLandmarksView.as_view(), name='add_landmarks'),
+    path('addSmile/', AddSmileView.as_view(), name='add_smile'),
+    path('addRefPhoto/', AddRefPhotoView.as_view(), name='add_ref_photo'),
+    path('addRefLandmarks/', AddRefPhotoLandmarksView.as_view(), name='add_ref_photo_landmarks'),
+    # -------------------------------------
+
+
 
     path('', TemplateView.as_view(template_name='index.html')),
 

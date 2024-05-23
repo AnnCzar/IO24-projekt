@@ -216,29 +216,75 @@ class LoginView(APIView):  #not working how I want - TO FIX
 
 
 
-class AddExamiantionView(views.APIView):
+# class AddExamiantionView(views.APIView):   #its not working, dont delete
+#     def post(self, request):
+#         if 'patient_id' not in request.data:  # change it later, use session
+#             return Response({'error': 'Patient ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         patient_id = request.data['patient_id']
+#         try:
+#             patient = UserProfile.objects.get(id=patient_id)
+#         except UserProfile.DoesNotExist:
+#             return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
+#
+#         data = request.data
+#         data['patient_id'] = patient.id
+#
+#         recording_serializer = RecordingsSerializer(data=data)
+#         if recording_serializer.is_valid():
+#             recording = recording_serializer.save()
+#             return Response(recording_serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(recording_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#
+class AddRecordingView(views.APIView):  #adding info about recordings to database
     def post(self, request):
-        if 'patient_id' not in request.data:  # change it later, use session
-            return Response({'error': 'Patient ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        #here add a function that divides the recording into frames?
+        #How to get  the time of the recording?
 
-        patient_id = request.data['patient_id']
-        try:
-            patient = UserProfile.objects.get(id=patient_id)
-        except UserProfile.DoesNotExist:
-            return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        data = request.data
-        data['patient_id'] = patient.id
-
-        recording_serializer = RecordingsSerializer(data=data)
-        if recording_serializer.is_valid():
-            recording = recording_serializer.save()
-            return Response(recording_serializer.data, status=status.HTTP_201_CREATED)
+        recordings_serializer = RecordingsSerializer(data=request.data)
+        if recordings_serializer.is_valid():
+            recordings_serializer.save()
+            return Response(recordings_serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(recording_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddFrameView(views.APIView): #adding info about frame to database
+    def post(self, request):
+        # move this code to 'generate_frame' and there refer to function which generete center point ???????
+        frames_serializer = FramesSerializer(data=request.data)
+        if frames_serializer.is_valid():
+            frames_serializer.save()
+            return Response(frames_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(frames_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
+class AddFrameLandmarksView(views.APIView):
+    # IDEA: merge this code with code from 'AddFrameView'
+    def post(self, request):
+        frame_landmarks_serializer = FrameLandmarksSerializer(data=request.data)
+        if frame_landmarks_serializer.is_valid():
+            frame_landmarks_serializer.save()
+            return Response(frame_landmarks_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(frame_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddSmileView(views.APIView):
+    # IDEA: merge this code with code from 'AddFrameView'
+    def post(self, request):
+        smile_serializer = SmileSerializer(data=request.data)
+        if smile_serializer.is_valid():
+
+            smile_serializer.save()
+            return Response(smile_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(smile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -260,3 +306,26 @@ def video_stream(request):
 @api_view(['GET'])  # just a message that recoding has started
 def start_video_processing(request):
     return HttpResponse("Video processing started.")
+
+
+
+
+
+class AddRefPhotoView(views.APIView):
+    def post(self, request):
+        ref_photos_serializer = RefPhotosSerializer(data=request.data)
+        if ref_photos_serializer.is_valid():
+            ref_photos_serializer.save()
+            return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AddRefPhotoLandmarksView(views.APIView):
+    # IDEA: merge this code with code from 'AddRefPhotoView'
+    def post(self, request):
+        ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(data=request.data)
+        if ref_photos_landmarks_serializer.is_valid():
+            ref_photos_landmarks_serializer.save()
+            return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
