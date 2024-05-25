@@ -1,0 +1,46 @@
+.reference-photo {
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(300px);
+}
+
+
+.background {
+  background-image: url('../images/background.svg');
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 60px);
+}
+
+.reference-photo button {
+    font-size: 2rem;
+    margin-top: 2rem;
+}
+.webcam-container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.webcam-container video {
+  width: 100%;
+  height: auto;
+}
+
+.header {
+  color: white;
+  transform: translateY(150px);
+  font-style: revert;
+  font-size: 70px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+
+}
+
+
+
+
