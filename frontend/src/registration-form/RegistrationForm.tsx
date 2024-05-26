@@ -41,8 +41,8 @@ function RegistrationForm() {
   );
 
   return (
-    <div className="background">
-        <header className="header">SIGN UP</header>
+    <div className="background_register">
+        <header className="header_register">SIGN UP</header>
       <Formik
         initialValues={{ username: "", password: "", name: "", surname: "", pesel: "", pwz: ""}}
         onSubmit={onSubmit}

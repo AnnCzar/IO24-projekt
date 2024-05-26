@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
-import {Button, Link, TextField} from "@mui/material";
+import {Button, TextField} from "@mui/material";
 import { Formik } from "formik";
+import {Navigate, useNavigate} from "react-router-dom";
 import * as yup from "yup";
 import "./RegistrationForm.css";
 
@@ -14,11 +15,19 @@ interface FormValues {
 }
 
 function RegistrationFormD() {
+  const navigate = useNavigate();
   const onSubmit = useCallback(
-    (values: FormValues, formik: any) => {
-      console.log(values);
+     (values: { username: string, password: string, name: string, surname: string, pesel: string, pwz: string }, formik: any) => {
+      // apiClient.login(values).then((response) => {
+      //   console.log(response);
+      //   if (response.success) {
+      navigate('/patients-table');
+      //   } else {
+      //     formik.setFieldError('username', 'Invalid username or password');
+      //   }
+      // });
     },
-    [],
+    [navigate],
   );
 
   const validationSchema = useMemo(
@@ -42,8 +51,8 @@ function RegistrationFormD() {
   );
 
   return (
-    <div className="background">
-        <header className="header">SIGN UP</header>
+    <div className="background_register">
+        <header className="header_register">SIGN UP</header>
       <Formik
         initialValues={{ username: "", password: "", name: "", surname: "", pesel: "", pwz: ""}}
         onSubmit={onSubmit}
@@ -67,8 +76,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.name && !!formik.errors.name}
               helperText={formik.touched.name && formik.errors.name}
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
 
             />
                <TextField
@@ -80,8 +89,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.surname && !!formik.errors.surname}
               helperText={formik.touched.surname && formik.errors.surname}
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
             />
             <TextField
               id="username"
@@ -92,8 +101,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.username && !!formik.errors.username}
               helperText={formik.touched.username && formik.errors.username}
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
             />
             <TextField
               id="password"
@@ -105,8 +114,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.password && !!formik.errors.password}
               helperText={formik.touched.password && formik.errors.password}
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
             />
 
             <TextField
@@ -118,8 +127,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.pesel && !!formik.errors.pesel}
               helperText={formik.touched.pesel && formik.errors.pesel}
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
             />
 
             <TextField
@@ -131,8 +140,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.pwz && !!formik.errors.pwz}
               helperText={formik.touched.pwz && formik.errors.pwz}
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
             />
 
             <Button

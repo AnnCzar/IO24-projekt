@@ -1,0 +1,55 @@
+/* PatientsTable.css */
+.patients {
+  padding: 0.1rem; /* 5rem */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(1rem); /* 300px / 16px = 18.75rem */
+}
+
+.background_patientstab {
+  background-image: url('../images/background.svg');
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 3.75rem); /* 60px / 16px = 3.75rem */
+}
+
+.header_patientstab {
+  color: white;
+  transform: translateY(2rem); /* 150px / 16px = 9.375rem */
+  font-style: revert;
+  font-size: 4rem; /* 70px / 16px = 4.375rem */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.1rem; /* 20px / 16px = 1.25rem */
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.table-wrapper {
+  width: 60%; /* Możesz dostosować szerokość tabeli do swoich potrzeb */
+}
+
+/* Dodatkowe style dla tabeli */
+.table-wrapper table {
+  width: 60%;
+  border-collapse: collapse;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.table-wrapper th {
+  background-color: #f2f2f2;
+}
