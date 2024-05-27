@@ -1,83 +1,66 @@
 .examination {
-  padding: 5rem;
+  padding: 0.1rem; /* 5rem */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(300px);
+  transform: translateY(3rem); /* 300px / 16px = 18.75rem */
 }
 
-
-.background {
+.background_ex {
   background-image: url('../images/background.svg');
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 3.75rem); /* 60px / 16px = 3.75rem */
 }
 
 .examination button {
-    font-size: 2rem;
-    margin-top: 2rem;
-}
-.webcam-container {
-  width: 100%;
-  max-width: 800px;
+  font-size: 1.2rem; /* 32px / 16px = 2rem */
+  margin-top: 2rem; /* 32px / 16px = 2rem */
 }
 
-.webcam-container video {
-  width: 100%;
-  height: auto;
-}
-
-.header {
+.header_ex {
   color: white;
-  transform: translateY(150px);
+  transform: translateY(2rem); /* 150px / 16px = 9.375rem */
   font-style: revert;
-  font-size: 70px;
+  font-size: 4rem; /* 70px / 16px = 4.375rem */
   font-weight: bold;
   text-align: center;
-  margin-bottom: 20px;
-
+  margin-bottom: 1.25rem; /* 20px / 16px = 1.25rem */
 }
+
 .myButton {
   position: fixed;
-  top: 20px;
-  flex-direction: column;
-  left: 20px;
+  top: 1.25rem; /* 20px / 16px = 1.25rem */
+  left: 1.25rem; /* 20px / 16px = 1.25rem */
   z-index: 9999;
-  width: 120px;
-  height: 120px;
+  width: 6.5rem; /* 120px / 16px = 7.5rem */
+  height: 6.5rem; /* 120px / 16px = 7.5rem */
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   background: transparent;
   border: none;
-  fill: black;
 }
 
 .myButton svg {
-  width: 50px;
-  height: 50px;
-  fill: currentColor;
+  width: 5rem; /* 50px / 16px = 3.125rem */
+  height: 5rem; /* 50px / 16px = 3.125rem */
 }
 
 .myButton span {
-  margin-top: 5px;
-  font-size: 20px;
-}
-
-.myButton:hover {
-  background-color: #f0f0f0;
+  margin-top: 0.3125rem; /* 5px / 16px = 0.3125rem */
+  font-size: 1.2rem; /* 20px / 16px = 1.25rem */
 }
 
 .reportsButton {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 1.25rem; /* 20px / 16px = 1.25rem */
+  right: 1.25rem; /* 20px / 16px = 1.25rem */
   z-index: 9999;
-  width: 120px;
+  width: 6.5rem; /* 120px / 16px = 7.5rem */
   height: auto;
   display: flex;
   flex-direction: column;
@@ -89,24 +72,11 @@
 }
 
 .reportsButton .icon {
-  width: 60px;
-  height: 60px;
-  fill: black;
+  width: 5rem; /* 60px / 16px = 3.75rem */
+  height: 5rem; /* 60px / 16px = 3.75rem */
 }
 
 .reportsButton span {
-  margin-top: 5px;
-  font-size: 20px;
+  margin-top: 0.3125rem; /* 5px / 16px = 0.3125rem */
+  font-size: 1.25rem; /* 20px / 16px = 1.25rem */
 }
-
-.reportsButton:hover {
-  background-color: #f0f0f0;
-  color: black;
-}
-
-
-
-
-
-
-

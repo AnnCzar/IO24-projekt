@@ -30,7 +30,7 @@ function Examination() {
     }
 
     return (
-   <div className="background">
+   <div className="background_ex">
   <button className="myButton" onClick={handleClick}>
     <LogoutIcon />
     <span>Log out</span>
@@ -41,7 +41,7 @@ function Examination() {
   </button>
 
 
-      <header className="header">EXAMINATION</header>
+      <header className="header_ex">EXAMINATION</header>
       <div className="examination">
         <div className="webcam-container">
           <Webcam ref={webRef} />

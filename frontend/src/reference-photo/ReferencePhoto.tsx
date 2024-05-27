@@ -26,8 +26,8 @@ function ReferencePhoto() {
   }
 
   return (
-    <div className="background">
-      <header className="header">TAKE A REFERENCE PHOTO</header>
+    <div className="background_photo">
+      <header className="header_photo">TAKE A REFERENCE PHOTO</header>
       <div className="reference-photo">
         <div className="webcam-container">
           <Webcam ref={webRef} />

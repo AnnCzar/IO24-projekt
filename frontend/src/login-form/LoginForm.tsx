@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Button, Link, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
-import "./LoginForm.css";
+import { Link } from 'react-router-dom';
 import RoleChoice from "../role-choice/RoleChoice";
+import "./LoginForm.css";
 
 interface FormValues {
   username: string;
@@ -57,6 +58,7 @@ function LoginForm() {
                 <TextField
                   id="username"
                   name="username"
+                  className="login-text"
                   label="Login"
                   variant="standard"
                   onChange={formik.handleChange}
@@ -86,17 +88,21 @@ function LoginForm() {
                   variant="contained"
                   type="submit"
                   disabled={!(formik.isValid && formik.dirty)}
+                  className="login-button" // Poprawna klasa dla przycisku logowania
+                  component={Link}
+                  to={"/patients-table"}
                 >
                   SIGN IN
                 </Button>
 
-                <Link
-                  href="#"
-                  style={{ fontSize: "25px" }}
-                  onClick={handleRegistrationLinkClick}
+                <Button
+                  variant="outlined"
+                  className="register-button" // Poprawna klasa dla przycisku rejestracji
+                  component={Link}
+                  to="/role-choice"
                 >
                   Register
-                </Link>
+                </Button>
               </form>
             )}
           </Formik>
