@@ -1,3 +1,8 @@
+import base64
+from datetime import date
+
+import cv2
+import numpy as np
 from django.contrib.auth.hashers import make_password
 from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpResponse
 from rest_framework import views
@@ -191,7 +196,8 @@ class PatientRegistration(views.APIView):
             else:
                 return Response({'error': 'User profile data does not match.'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response('The patient with a given PESEL number is not in the database', status=status.HTTP_400_BAD_REQUEST)
+            return Response('The patient with a given PESEL number is not in the database',
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):  #not working how I want - TO FIX
@@ -206,7 +212,7 @@ class LoginView(APIView):  #not working how I want - TO FIX
         user = auth_backend.authenticate(request, login=login_value, password=password)
 
         if user is not None:
-              # Przekazanie nazwy backendu
+            # Przekazanie nazwy backendu
             request.session['user_role'] = user.role
             return Response('User logged in', status=status.HTTP_200_OK)
             # return HttpResponseRedirect('/success-url/')  # Przekierowanie po zalogowaniu
@@ -250,7 +256,7 @@ class AddRecordingView(views.APIView):  #adding info about recordings to databas
             return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AddFrameView(views.APIView): #adding info about frame to database
+class AddFrameView(views.APIView):  #adding info about frame to database
     def post(self, request):
         # move this code to 'generate_frame' and there refer to function which generete center point ???????
         frames_serializer = FramesSerializer(data=request.data)
@@ -272,37 +278,75 @@ class AddFrameLandmarksView(views.APIView):
             return Response(frame_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AddSmileView(views.APIView):
-    # IDEA: merge this code with code from 'AddFrameView'
-    def post(self, request):
-        smile_serializer = SmileSerializer(data=request.data)
-        if smile_serializer.is_valid():
-
-            smile_serializer.save()
-            return Response(smile_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(smile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 def generate_frames():
     processor = VideoProcessor()  # call VideoProcessor class from AI model
     while True:
         frame = processor.process_frame()
         if frame is None:
             break
-        yield (b'--frame\r\n'       # returns the processed frame as a byte string
+        yield (b'--frame\r\n'  # returns the processed frame as a byte string
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
-class CapturePhotoView(APIView):
-    def get(self, request):
-        processor = VideoProcessor()
-        _, img_bytes = processor.capture_photo()
-        if img_bytes is None:
-            return HttpResponse("Failed to capture photo.", status=500)
-        return HttpResponse(img_bytes, content_type='image/jpeg')
+# class CapturePhotoView(APIView):
+#     def get(self, request):
+#         processor = VideoProcessor()
+#         _, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo()
+#         if img_bytes is None:
+#             return HttpResponse("Failed to capture photo.", status=500)
+#         return HttpResponse(img_bytes, content_type='image/jpeg')
+#
 
-@api_view(['GET'])   # streams the video frames to the client
+
+# version with save to the database
+class CapturePhotoView(APIView):
+    def post(self, request):
+        data = request.data
+        image_data = data['image']
+        image_data = base64.b64decode(image_data.split(',')[1])
+        np_arr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        date_now = date.today()
+        patient_id = 1  # example - change when session will be connect
+
+        processor = VideoProcessor()
+        _, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo()
+
+        ref_photo_data = {
+            'date': date_now,
+            'x_center': x_center,
+            'y_center': y_center,
+            'patient_id': patient_id
+        }
+        # addRefPhotoView(ref_photo_data)   # it's not working, because i cant get photo id
+        ref_photos_serializer = RefPhotosSerializer(data=ref_photo_data)
+
+        for landmark, distnace in distances.items():
+            ref_photo_landmarks_data = {
+                'x_cord': distnace,  # zmienic tabele
+                'y_cord': 0,
+                'landmark_number': landmark,
+                'ref_photo': ref_photos_serializer.data['id']
+            }
+            ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(ref_photo_landmarks_data)
+            if ref_photos_landmarks_serializer.is_valid():
+                ref_photos_landmarks_serializer.save()
+                return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if ref_photos_serializer.is_valid():
+            ref_photos_serializer.save()
+            return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if img_bytes is None:  # to nwm czy nie wywalic
+            return HttpResponse("Failed to capture photo.", status=500)
+
+
+@api_view(['GET'])  # streams the video frames to the client
 def video_stream(request):
     return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
@@ -312,22 +356,111 @@ def start_video_processing(request):
     return HttpResponse("Video processing started.")
 
 
-class AddRefPhotoView(views.APIView):
-    def post(self, request):
-        ref_photos_serializer = RefPhotosSerializer(data=request.data)
-        if ref_photos_serializer.is_valid():
-            ref_photos_serializer.save()
-            return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])  # new fun to add recordings
+def add_recording(request):
+    video_file = request.FILES['video']  # przesłanie nagrania z fronta
+    video_data = video_file.read()
+
+    # Process video through AI model
+    processor = VideoProcessor()
+    all_frames_data = processor.process_video(video_data)
+
+    recording_data = {
+        'date': date.today(),
+        'time': 10,
+        'patient_id': 1,  # example - change when session will be connect
+    }
+
+    recordings_serializer = RecordingsSerializer(data=recording_data)
+    if recordings_serializer.is_valid():
+        recording = recordings_serializer.save()
+
+        # Save frames and landmarks to database
+        for frame_number, frame_data in all_frames_data:
+
+            frame_serializer = FramesSerializer(data={
+                'recording': recording.id,
+                'frame_number': frame_number,
+                'timestamp': frame_data['timestamp']
+            })
+
+            if frame_serializer.is_valid():
+                frame = frame_serializer.save()
+
+                for landmark_index, distance in frame_data['landmarks'].items():
+                    landmark_serializer = FrameLandmarksSerializer(data={
+                        'frame': frame.id,
+                        'landmark_index': landmark_index,
+                        'distance': distance,
+                    })
+                    if landmark_serializer.is_valid():
+                        landmark_serializer.save()
+
+        return Response(recordings_serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AddRefPhotoLandmarksView(views.APIView):
-    # IDEA: merge this code with code from 'AddRefPhotoView'
-    def post(self, request):
-        ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(data=request.data)
-        if ref_photos_landmarks_serializer.is_valid():
-            ref_photos_landmarks_serializer.save()
-            return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['DELETE'])
+def delete_user(request, user_id):
+    try:
+        # Usunięcie danych z tabeli Auth
+        Auth.objects.filter(id=user_id).delete()
+
+        # Sprawdzenie czy użytkownik jest pacjentem
+        if Patient.objects.filter(user_id=user_id).exists():
+            # Usunięcie danych z tabeli Patient
+            Patient.objects.filter(user_id=user_id).delete()
+
+        # Sprawdzenie czy użytkownik jest lekarzem
+        if Doctor.objects.filter(user_id=user_id).exists():
+            # Usunięcie danych z tabeli Doctor
+            Doctor.objects.filter(user_id=user_id).delete()
+
+        # Sprawdzenie czy użytkownik jest przypisany do jakiegoś lekarza lub pacjenta
+        if DoctorAndPatient.objects.filter(doctor_id=user_id).exists():
+            # Usunięcie przypisania do lekarza
+            DoctorAndPatient.objects.filter(doctor_id=user_id).delete()
+
+        if DoctorAndPatient.objects.filter(patient_id=user_id).exists():
+            # Usunięcie przypisania do pacjenta
+            DoctorAndPatient.objects.filter(patient_id=user_id).delete()
+
+        # Usunięcie danych z tabeli UserProfile
+        UserProfile.objects.filter(id=user_id).delete()
+
+        # Zwrócenie odpowiedzi HTTP
+        return Response({'message': 'User deleted successfully'}, status=200)
+
+    except Exception as e:
+        # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
+        return Response({'error': 'Failed to delete user'}, status=500)
+
+# def addRefPhotoView(request):
+#     ref_photos_serializer = RefPhotosSerializer(data=request.data)
+#     if ref_photos_serializer.is_valid():
+#         ref_photos_serializer.save()
+#         return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
+#     else:
+#         return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+
+# class AddRefPhotoView(views.APIView):
+#     def post(self, request):
+#         ref_photos_serializer = RefPhotosSerializer(data=request.data)
+#         if ref_photos_serializer.is_valid():
+#             ref_photos_serializer.save()
+#             return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class AddRefPhotoLandmarksView(views.APIView):
+#     # IDEA: merge this code with code from 'AddRefPhotoView'
+#     def post(self, request):
+#         ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(data=request.data)
+#         if ref_photos_landmarks_serializer.is_valid():
+#             ref_photos_landmarks_serializer.save()
+#             return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -42,12 +42,6 @@ class DoctorAndPatient(models.Model):
 
     patient_id = models.IntegerField(default=1)
     doctor_id = models.IntegerField(default=1)
-    # patient_id = models.ForeignKey(Patient, related_name='patient_relations', on_delete=models.CASCADE, null=True)
-    # doctor_id = models.ForeignKey(Doctor, related_name='doctor_relations', on_delete=models.CASCADE, null=True)
-    # patient = models.ManyToManyField(Patient, related_name='doctor_relations')
-    # doctor = models.ManyToManyField(Doctor, related_name='patient_relations')
-    # def __str__(self):
-    #     return f"Doctor: {self.doctor.username}, Patient: {self.patient.username}"
 
 class Auth(models.Model):
 
@@ -74,21 +68,22 @@ class Frames(models.Model):
 
 class FrameLandmarks(models.Model):
     id = models.AutoField(primary_key=True)
-    x_cord = models.FloatField()
-    y_cord = models.FloatField()
     landmark_number = models.IntegerField()
+    distance = models.FloatField()
     frame_id = models.OneToOneField(Frames, on_delete=models.CASCADE)
 
 class RefPhotoLandmarks(models.Model):
     id = models.AutoField(primary_key=True)
-    x_cord = models.FloatField()
-    y_cord = models.FloatField()
     landmark_number = models.IntegerField()
+    distance = models.FloatField()
     ref_photo = models.OneToOneField(RefPhotos, on_delete=models.CASCADE)
-class Smile(models.Model):
+
+
+class Reports(models.Model):
     id = models.AutoField(primary_key=True)
-    left_corner_photo = models.FloatField()
-    right_corner_photo = models.FloatField()
-    left_corner = models.FloatField()
-    right_corner = models.FloatField()
-    frame_id = models.OneToOneField(Frames, on_delete=models.CASCADE)
+    date = models.DateTimeField()
+    difference_mouth = models.FloatField()
+    difference_2 = models.FloatField()
+    patient_id = models.OneToOneField(UserProfile, on_delete=models.PROTECT)
+
+
