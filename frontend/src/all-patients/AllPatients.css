@@ -1,27 +1,27 @@
-.background {
+.background_all_patients {
   background-image: url('../images/background.svg');
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 3.75rem);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
 }
 
-.header {
+.header_all_patients {
   color: white;
-  margin-top: 190px;
+  margin-top: 2.5rem;
   font-style: revert;
-  font-size: 70px;
+  font-size: 4.375rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .table-container-wrapper {
-  margin-top: 100px;
+  margin-top: 6.25rem;
   width: 80%;
   display: flex;
   justify-content: center;
@@ -43,6 +43,7 @@
   text-align: center;
   font-weight: bold;
 }
+
 .table {
   table-layout: fixed;
   margin: 0 auto;
@@ -56,14 +57,15 @@
   justify-content: flex-start;
   align-items: center;
 }
-.go-back {
+
+.goback_all_patients {
   position: fixed;
-  top: 20px;
+  top: 1.25rem;
   flex-direction: column;
-  left: 20px;
+  left: 1.25rem;
   z-index: 9999;
-  width: 120px;
-  height: 120px;
+  width: 6rem;
+  height: 6rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -73,15 +75,15 @@
   fill: black;
 }
 
-.go-back svg {
-  width: 50px;
-  height: 50px;
+.goback_all_patients svg {
+  width: 2.5rem;
+  height: 2.5rem;
   fill: currentColor;
 }
 
-.go-back span {
-  margin-top: 5px;
-  font-size: 20px;
+.goback_all_patients span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
 }
 
 .go-back:hover {
@@ -90,10 +92,10 @@
 
 .delete-patient {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 1.25rem;
+  right: 1.25rem;
   z-index: 9999;
-  width: 120px;
+  width: 6rem;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -105,14 +107,14 @@
 }
 
 .delete-patient .icon {
-  width: 60px;
-  height: 60px;
+  width: 2rem;
+  height: 2rem;
   fill: black;
 }
 
 .delete-patient span {
-  margin-top: 5px;
-  font-size: 20px;
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
 }
 
 .delete-patient:hover {

@@ -4,13 +4,13 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { ReactComponent as LogoutIcon } from "../images/logout.svg";
 import { ReactComponent as AddPatient } from "../images/add_patient.svg";
-
 import './Patients.css';
+import {useNavigate} from "react-router-dom";
+import {useCallback} from "react";
 
 interface Column {
   id: 'patients_id' | 'sex' | 'date_of_birth' | 'pesel' | 'date_of_diagnosis';
@@ -63,6 +63,7 @@ const rows: Data[] = [
 ];
 
 export default function Patients() {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -75,14 +76,22 @@ export default function Patients() {
     setPage(0);
   };
 
+  const handleLogOutClick = useCallback(() => {
+    navigate('/login');
+    }, [navigate]);
+
+  const handleAddPatientClick = useCallback(() => {
+    navigate('/addpatient');
+    }, [navigate]);
+
   return (
-    <div className="background">
-      <header className="header">PATIENTS</header>
-      <button className="log-out" >
-    <LogoutIcon />
-    <span>Log out</span>
+    <div className="background_patients">
+      <header className="header_patients">PATIENTS</header>
+      <button className="log_out" onClick={handleLogOutClick}>
+      <LogoutIcon />
+      <span>Log out</span>
   </button>
-  <button className="add-patient">
+  <button className="new_patient" onClick={handleAddPatientClick}>
     <AddPatient className="icon" />
     <span>Add patient</span>
   </button>

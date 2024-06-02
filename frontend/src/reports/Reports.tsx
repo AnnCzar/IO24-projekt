@@ -9,6 +9,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { ReactComponent as GoBack } from "../images/back.svg";
 import './Reports.css';
+import {useNavigate} from "react-router-dom";
 
 interface Column {
   id: 'date' | 'score' | 'coords' | 'comment';
@@ -52,6 +53,7 @@ const rows: Data[] = [
 ];
 
 export default function Reports() {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -64,10 +66,14 @@ export default function Reports() {
     setPage(0);
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
-    <div className="background">
-      <header className="header">REPORTS</header>
-      <button className="go-back" >
+    <div className="background_reports">
+      <header className="header_reports">REPORTS</header>
+      <button className="go-back" onClick={handleGoBack}>
         <GoBack />
         <span>Go back</span>
       </button>

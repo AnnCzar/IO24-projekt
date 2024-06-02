@@ -1,37 +1,38 @@
-.patients-id {
-  padding: 5rem;
+.patients_id {
+  padding: 0.1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(300px);
+  transform: translateY(6rem);
 }
 
-.background {
+.background_id {
   background-image: url('../images/background.svg');
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 3.75rem);
 }
-.header {
+
+.header_id {
   color: white;
-  transform: translateY(190px);
+  transform: translateY(2.5rem);
   font-style: revert;
-  font-size: 70px;
+  font-size: 4.375rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 20px;
-
+  margin-bottom: 1.25rem;
 }
-.go-back {
+
+.goback_id {
   position: fixed;
-  top: 20px;
+  top: 1.25rem;
   flex-direction: column;
-  left: 20px;
+  left: 1.25rem;
   z-index: 9999;
-  width: 120px;
-  height: 120px;
+  width: 7.5rem;
+  height: 7.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,21 +42,22 @@
   fill: black;
 }
 
-.go-back svg {
-  width: 50px;
-  height: 50px;
+.goback_id svg {
+  width: 3.125rem;
+  height: 3.125rem;
   fill: currentColor;
 }
 
-.go-back span {
-  margin-top: 5px;
-  font-size: 20px;
+.goback_id span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
 }
 
-.go-back:hover {
+.goback_id:hover {
   background-color: #f0f0f0;
 }
-.patients-id button {
-  font-size: 25px;
-  margin-top: 30px;
+
+.patients_id button{
+  font-size: 1.2rem;
+  margin-top: 2rem;
 }

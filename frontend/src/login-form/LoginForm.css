@@ -1,4 +1,4 @@
-.login-form {
+.login_form {
   padding: 0.1rem;
   display: flex;
   flex-direction: column;
@@ -7,28 +7,28 @@
   transform: translateY(8rem);
 }
 
-.login-form input[type="text"],
-.login-form input[type="password"] {
+.login_form input[type="text"],
+.login_form input[type="password"] {
   font-size: 1rem;
 }
 
-.login-text{
+.login_text{
     margin-bottom: 1rem;
 }
 
-.login-button {
-  font-size: 1.2rem; /* Zmieniono z 30rem na 1.5rem */
+.login_button {
+  font-size: 1.2rem;
   margin-top: 1.5rem;
   margin-bottom: 1rem;
 }
 
-.register-button {
-  font-size: 1.2rem; /* Zmieniono z 30rem na 1.5rem */
-  margin-top: 1rem;
+.register_button {
+  font-size: 5rem;
+  margin-top: 5rem;
   margin-bottom: 1rem;
 }
 
-.background {
+.background_login {
   background-image: url('../images/background.svg');
   background-size: cover;
   background-repeat: no-repeat;
@@ -36,7 +36,7 @@
   height: 100vh;
 }
 
-.header {
+.header_login {
   color: white;
   transform: translateY(4rem);
   font-style: revert;

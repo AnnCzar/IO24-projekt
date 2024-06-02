@@ -35,12 +35,12 @@ function LoginForm() {
   };
 
   return (
-    <div className="background">
+    <div className="background_login">
       {showRoleChoice ? (
         <RoleChoice />
       ) : (
         <div>
-          <header className="header">SIGN IN</header>
+          <header className="header_login">SIGN IN</header>
           <Formik
             initialValues={{ username: "", password: "" }}
             onSubmit={onSubmit}
@@ -50,7 +50,7 @@ function LoginForm() {
           >
             {(formik) => (
               <form
-                className="login-form"
+                className="login_form"
                 id="signForm"
                 noValidate
                 onSubmit={formik.handleSubmit}
@@ -58,7 +58,7 @@ function LoginForm() {
                 <TextField
                   id="username"
                   name="username"
-                  className="login-text"
+                  className="login_text"
                   label="Login"
                   variant="standard"
                   onChange={formik.handleChange}
@@ -88,16 +88,16 @@ function LoginForm() {
                   variant="contained"
                   type="submit"
                   disabled={!(formik.isValid && formik.dirty)}
-                  className="login-button" // Poprawna klasa dla przycisku logowania
+                  className="login_button"
                   component={Link}
-                  to={"/patients-table"}
+                  to={"/patients"}
                 >
                   SIGN IN
                 </Button>
 
                 <Button
                   variant="outlined"
-                  className="register-button" // Poprawna klasa dla przycisku rejestracji
+                  className="register_button" // Poprawna klasa dla przycisku rejestracji
                   component={Link}
                   to="/role-choice"
                 >

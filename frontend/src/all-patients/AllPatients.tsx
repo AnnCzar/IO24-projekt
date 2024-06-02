@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importujemy useNavigate
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -62,6 +64,7 @@ const rows: Data[] = [
 ];
 
 export default function AllPatients() {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -74,14 +77,22 @@ export default function AllPatients() {
     setPage(0);
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleDeletePatient = useCallback(() => {
+    navigate('/patientsid');
+  }, [navigate]);
+
   return (
-    <div className="background">
-      <header className="header">ALL PATIENTS</header>
-      <button className="go-back" >
+    <div className="background_all_patients">
+      <header className="header_all_patients">ALL PATIENTS</header>
+      <button className="goback_all_patients" onClick={handleGoBack}>
         <GoBack />
         <span>Go back</span>
       </button>
-      <button className="delete-patient">
+      <button className="delete-patient" onClick={handleDeletePatient}>
         <DeletePatient className="icon" />
         <span>Delete patient</span>
       </button>
@@ -95,7 +106,7 @@ export default function AllPatients() {
                     <TableCell
                       key={column.id}
                       align={index === 0 ? 'center' : column.align}
-                      style={{ minWidth: column.minWidth }}
+                      style={{ minWidth: `${column.minWidth}px` }} // Używamy px tutaj zgodnie z wcześniejszym kodem
                       className={`no-bottom-border`}
                     >
                       <b>{column.label}</b>
