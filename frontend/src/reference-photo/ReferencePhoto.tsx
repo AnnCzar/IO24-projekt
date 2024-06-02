@@ -7,7 +7,6 @@ import {useNavigate} from "react-router-dom";
 function ReferencePhoto() {
   const navigate = useNavigate();
   const webRef = useRef<any>(null);
-  const [redirect, setRedirect] = useState<boolean>(false);
   const [photoTaken, setPhotoTaken] = useState<boolean>(false);
 
   const showImage = async () => {

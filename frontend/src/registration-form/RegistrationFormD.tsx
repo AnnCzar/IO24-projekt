@@ -1,18 +1,18 @@
 import React, { useCallback, useMemo } from "react";
-import {Button, TextField} from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
-import {Navigate, useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import "./RegistrationForm.css";
 
-interface FormValues {
-  username: string;
-  password: string;
-  name: string;
-  surname: string;
-  pesel: string;
-  pwz: string;
-}
+// interface FormValues {
+//   username: string;
+//   password: string;
+//   name: string;
+//   surname: string;
+//   pesel: string;
+//   pwz: string;
+// }
 
 function RegistrationFormD() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ function RegistrationFormD() {
       // apiClient.login(values).then((response) => {
       //   console.log(response);
       //   if (response.success) {
-      navigate('/patients-table');
+      navigate('/patients');
       //   } else {
       //     formik.setFieldError('username', 'Invalid username or password');
       //   }
@@ -67,7 +67,7 @@ function RegistrationFormD() {
             noValidate
             onSubmit={formik.handleSubmit}
           >
-              <TextField
+            <TextField
               id="name"
               name="name"
               label="Name"
@@ -80,7 +80,7 @@ function RegistrationFormD() {
               InputProps={{ style: { fontSize: '1.25rem' } }}
 
             />
-               <TextField
+           <TextField
               id="surname"
               name="surname"
               label="Surname"
@@ -151,7 +151,6 @@ function RegistrationFormD() {
             >
               CONFIRM
             </Button>
-
           </form>
         )}
       </Formik>

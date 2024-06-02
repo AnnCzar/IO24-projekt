@@ -30,9 +30,9 @@ function LoginForm() {
     []
   );
 
-  const handleRegistrationLinkClick = () => {
-    setShowRoleChoice(true);
-  };
+  // const handleRegistrationLinkClick = () => {
+  //   setShowRoleChoice(true);
+  // };
 
   return (
     <div className="background_login">

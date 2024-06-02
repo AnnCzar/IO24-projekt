@@ -10,14 +10,13 @@ import {useNavigate} from "react-router-dom";
 function Examination() {
     const navigate = useNavigate();
     const webRef = useRef<WebcamRef>(null);
-    const [redirect, setRedirect] = useState<boolean>(false);
 
-    const showImage = async () => {
-        if (webRef.current) {
-            const screenshot = await webRef.current.getScreenshot();
-            console.log(screenshot);
-        }
-    };
+    // const showImage = async () => {
+    //     if (webRef.current) {
+    //         const screenshot = await webRef.current.getScreenshot();
+    //         console.log(screenshot);
+    //     }
+    // };
 
     const handleLogOutClick = useCallback(() => {
         navigate('/login');
@@ -28,25 +27,25 @@ function Examination() {
     }, [navigate]);
 
     return (
-   <div className="background_ex">
-  <button className="myButton" onClick={handleLogOutClick}>
-    <LogoutIcon />
-    <span>Log out</span>
-  </button>
-  <button className="reportsButton" onClick={handleReportsClick}>
-    <ReportsIcon className="icon" />
-    <span>Reports</span>
-  </button>
-      <header className="header_ex">EXAMINATION</header>
-      <div className="examination">
-        <div className="webcam-container">
-          <Webcam ref={webRef} />
+        <div className="background_ex">
+            <button className="myButton" onClick={handleLogOutClick}>
+                <LogoutIcon />
+                    <span>Log out</span>
+            </button>
+            <button className="reportsButton" onClick={handleReportsClick}>
+                <ReportsIcon className="icon" />
+                <span>Reports</span>
+            </button>
+            <header className="header_ex">EXAMINATION</header>
+            <div className="examination">
+                <div className="webcam-container">
+                    <Webcam ref={webRef} />
+                </div>
+                <Button variant="contained" type="submit">
+                    START EXAMINATION
+                </Button>
+            </div>
         </div>
-        <Button variant="contained" type="submit">
-          START EXAMINATION
-        </Button>
-      </div>
-    </div>
   );
 }
 

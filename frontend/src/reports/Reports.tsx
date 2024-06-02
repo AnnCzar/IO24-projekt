@@ -49,7 +49,6 @@ interface Data {
 const rows: Data[] = [
   { date: '2024-05-24', score: 85, coords: '51.5074° N, 0.1278° W', comment: 'Good progress' },
   { date: '2024-05-23', score: 90, coords: '40.7128° N, 74.0060° W', comment: 'Excellent results' },
-  // Add more rows as needed
 ];
 
 export default function Reports() {

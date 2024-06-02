@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importujemy useNavigate
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -60,7 +60,6 @@ interface Data {
 const rows: Data[] = [
   { patients_id: 1, name: 'John Doe', sex: 'Male', email: 'john.doe@example.com', date_of_last_exam: '2023-05-15' },
   { patients_id: 2, name: 'Jane Smith', sex: 'Female', email: 'jane.smith@example.com', date_of_last_exam: '2022-12-20' },
-  // Add more rows as needed
 ];
 
 export default function AllPatients() {
@@ -106,7 +105,7 @@ export default function AllPatients() {
                     <TableCell
                       key={column.id}
                       align={index === 0 ? 'center' : column.align}
-                      style={{ minWidth: `${column.minWidth}px` }} // Używamy px tutaj zgodnie z wcześniejszym kodem
+                      style={{ minWidth: `${column.minWidth}px` }}
                       className={`no-bottom-border`}
                     >
                       <b>{column.label}</b>

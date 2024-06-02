@@ -58,8 +58,7 @@ interface Data {
 // Example rows data
 const rows: Data[] = [
   { patients_id: 1, sex: 'Male', date_of_birth: '1980-01-01', pesel: 80010112345, date_of_diagnosis: '2020-01-01' },
-  { patients_id: 2, sex: 'Female', date_of_birth: '1990-05-23', pesel: 90052312345, date_of_diagnosis: '2021-02-10' },
-  // Add more rows as needed
+  { patients_id: 2, sex: 'Female', date_of_birth: '1990-05-23', pesel: 90052312345, date_of_diagnosis: '2021-02-10' }
 ];
 
 export default function Patients() {
@@ -88,33 +87,32 @@ export default function Patients() {
     <div className="background_patients">
       <header className="header_patients">PATIENTS</header>
       <button className="log_out" onClick={handleLogOutClick}>
-      <LogoutIcon />
-      <span>Log out</span>
-  </button>
-  <button className="new_patient" onClick={handleAddPatientClick}>
-    <AddPatient className="icon" />
-    <span>Add patient</span>
-  </button>
+        <LogoutIcon />
+        <span>Log out</span>
+      </button>
+      <button className="new_patient" onClick={handleAddPatientClick}>
+        <AddPatient className="icon" />
+        <span>Add patient</span>
+      </button>
       <div className="table-container-wrapper">
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
           <TableContainer className="table-container" sx={{ maxHeight: 440 }}>
            <Table stickyHeader aria-label="sticky table" className="table">
-  <TableRow className="table-header">
-    {columns.map((column, index) => (
-      <TableCell
-        key={column.id}
-        align={index === 0 ? 'center' : column.align}
-        style={{ minWidth: column.minWidth }}
-        className={`no-bottom-border`}
-      >
-        {column.label}
-      </TableCell>
-    ))}
-  </TableRow>
-
-              <TableBody>
-                {rows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            <TableRow className="table-header">
+            {columns.map((column, index) => (
+              <TableCell
+                key={column.id}
+                align={index === 0 ? 'center' : column.align}
+                style={{ minWidth: column.minWidth }}
+                className={`no-bottom-border`}
+              >
+                {column.label}
+              </TableCell>
+            ))}
+            </TableRow>
+             <TableBody>
+               {rows
+                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                     return (
                       <TableRow hover role="checkbox" tabIndex={-1} key={row.patients_id}>
@@ -131,7 +129,7 @@ export default function Patients() {
                       </TableRow>
                     );
                   })}
-              </TableBody>
+             </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
