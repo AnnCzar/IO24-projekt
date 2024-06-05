@@ -88,7 +88,6 @@ function LoginForm() {
                   variant="contained"
                   type="submit"
                   disabled={!(formik.isValid && formik.dirty)}
-                  className="login_button"
                   component={Link}
                   to={"/patients"}
                 >
@@ -97,7 +96,6 @@ function LoginForm() {
 
                 <Button
                   variant="outlined"
-                  className="register_button" // Poprawna klasa dla przycisku rejestracji
                   component={Link}
                   to="/role-choice"
                 >

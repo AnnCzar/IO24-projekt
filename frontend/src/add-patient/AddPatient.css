@@ -25,9 +25,9 @@
   margin-bottom: 1rem;
 }
 
-.button_add_patient {
+.add_patient button{
   font-size: 1rem;
-  margin-top: 10rem;
+  margin-top: 2rem;
   margin-bottom: 10rem;
 }
 

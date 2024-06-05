@@ -39,7 +39,6 @@ function AddPatient() {
     (values: FormValues, formik: any) => {
       console.log(values);
       setSuccessMessage("User has been successfully added!");
-      formik.resetForm();
     },
     [],
   );
@@ -58,7 +57,7 @@ function AddPatient() {
   );
 
   return (
-      <div className="background">
+      <div className="background_add_patient">
           <header className="header_add_patient">ADD PATIENT</header>
           <button className="goback_add_patient" onClick={handleGoBack}>
               <GoBack/>
@@ -103,7 +102,7 @@ function AddPatient() {
                               error={formik.touched.name && !!formik.errors.name}
                               helperText={formik.touched.name && formik.errors.name}
                               InputLabelProps={{style: {fontSize: '1.25rem'}}}
-                              style={{width: '100%'}}
+                              style={{width: '20%'}}
                               inputProps={{style: {fontSize: '1.25rem'}}}
                           />
                           <TextField
@@ -116,10 +115,10 @@ function AddPatient() {
                               error={formik.touched.surname && !!formik.errors.surname}
                               helperText={formik.touched.surname && formik.errors.surname}
                               InputLabelProps={{style: {fontSize: '1.25rem'}}}
-                              style={{width: '100%'}}
+                              style={{width: '20%'}}
                               inputProps={{style: {fontSize: '1.25rem'}}}
                           />
-                          <FormControl component="fieldset" style={{textAlign: 'left', width: '100%'}}>
+                          <FormControl component="fieldset" style={{textAlign: 'left', width: '20%'}}>
                               <FormLabel component="legend" style={{
                                   fontSize: '1.25rem',
                                   marginLeft: 0,
@@ -157,7 +156,7 @@ function AddPatient() {
                               helperText={formik.touched.email && formik.errors.email}
                               InputLabelProps={{style: {fontSize: '1.25rem'}}}
                               inputProps={{style: {fontSize: '1.25rem'}}}
-                              style={{width: '100%'}}
+                              style={{width: '20%'}}
                           />
                           <TextField
                               id="date_of_birth"
@@ -170,7 +169,7 @@ function AddPatient() {
                               helperText={formik.touched.date_of_birth && formik.errors.date_of_birth}
                               InputLabelProps={{style: {fontSize: '1.25rem'}}}
                               inputProps={{style: {fontSize: '1.25rem'}}}
-                              style={{width: '100%'}}
+                              style={{width: '20%'}}
                           />
                           <TextField
                               id="pesel"
@@ -183,7 +182,7 @@ function AddPatient() {
                               helperText={formik.touched.pesel && formik.errors.pesel}
                               InputLabelProps={{style: {fontSize: '1.25rem'}}}
                               inputProps={{style: {fontSize: '1.25rem'}}}
-                              style={{width: '100%'}}
+                              style={{width: '20%'}}
                           />
                           <TextField
                               id="date_of_diagnosis"
@@ -196,7 +195,7 @@ function AddPatient() {
                               helperText={formik.touched.date_of_diagnosis && formik.errors.date_of_diagnosis}
                               InputLabelProps={{style: {fontSize: '1.25rem'}}}
                               inputProps={{style: {fontSize: '1.25rem'}}}
-                              style={{width: '100%'}}
+                              style={{width: '20%'}}
                           />
                           <Button
                               className="button_add_patient"

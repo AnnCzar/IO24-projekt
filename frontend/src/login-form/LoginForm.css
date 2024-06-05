@@ -16,15 +16,15 @@
     margin-bottom: 1rem;
 }
 
-.login_button {
+.login button {
   font-size: 1.2rem;
-  margin-top: 1.5rem;
+  margin-top: 10rem;
   margin-bottom: 1rem;
 }
 
-.register_button {
-  font-size: 5rem;
-  margin-top: 5rem;
+.register button {
+  font-size: 10rem;
+  margin-top: 10rem;
   margin-bottom: 1rem;
 }
 
