@@ -1,18 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
-<<<<<<< HEAD
-import { Button, Link, TextField } from "@mui/material";
-import { Formik } from "formik";
-import * as yup from "yup";
-import "./LoginForm.css";
-import RoleChoice from "../role-choice/RoleChoice";
-=======
 import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { Link } from 'react-router-dom';
 import RoleChoice from "../role-choice/RoleChoice";
 import "./LoginForm.css";
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
 
 interface FormValues {
   username: string;
@@ -38,30 +30,17 @@ function LoginForm() {
     []
   );
 
-<<<<<<< HEAD
-  const handleRegistrationLinkClick = () => {
-    setShowRoleChoice(true);
-  };
-
-  return (
-    <div className="background">
-=======
   // const handleRegistrationLinkClick = () => {
   //   setShowRoleChoice(true);
   // };
 
   return (
     <div className="background_login">
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
       {showRoleChoice ? (
         <RoleChoice />
       ) : (
         <div>
-<<<<<<< HEAD
-          <header className="header">SIGN IN</header>
-=======
           <header className="header_login">SIGN IN</header>
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
           <Formik
             initialValues={{ username: "", password: "" }}
             onSubmit={onSubmit}
@@ -71,11 +50,7 @@ function LoginForm() {
           >
             {(formik) => (
               <form
-<<<<<<< HEAD
-                className="login-form"
-=======
                 className="login_form"
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
                 id="signForm"
                 noValidate
                 onSubmit={formik.handleSubmit}
@@ -83,10 +58,7 @@ function LoginForm() {
                 <TextField
                   id="username"
                   name="username"
-<<<<<<< HEAD
-=======
                   className="login_text"
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
                   label="Login"
                   variant="standard"
                   onChange={formik.handleChange}
@@ -116,24 +88,12 @@ function LoginForm() {
                   variant="contained"
                   type="submit"
                   disabled={!(formik.isValid && formik.dirty)}
-<<<<<<< HEAD
-=======
                   component={Link}
                   to={"/patients"}
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
                 >
                   SIGN IN
                 </Button>
 
-<<<<<<< HEAD
-                <Link
-                  href="#"
-                  style={{ fontSize: "25px" }}
-                  onClick={handleRegistrationLinkClick}
-                >
-                  Register
-                </Link>
-=======
                 <Button
                   variant="outlined"
                   component={Link}
@@ -141,7 +101,6 @@ function LoginForm() {
                 >
                   Register
                 </Button>
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
               </form>
             )}
           </Formik>
