@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-import React from "react";
-import "./App.css";
-import LoginForm from "./login-form/LoginForm";
-function App() {
-  return (
-    <>
-      <LoginForm></LoginForm>
-    </>
-=======
 import React from 'react';
 import './App.css';
 import LoginForm from './login-form/LoginForm';
@@ -45,12 +35,8 @@ function App() {
       </Routes>
       {/*</ApiProvider>*/}
     </BrowserRouter>
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   );
 }
 
 export default App;
-<<<<<<< HEAD
-=======
 
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
