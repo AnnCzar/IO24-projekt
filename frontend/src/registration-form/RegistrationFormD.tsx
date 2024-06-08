@@ -1,26 +1,4 @@
 import React, { useCallback, useMemo } from "react";
-<<<<<<< HEAD
-import {Button, Link, TextField} from "@mui/material";
-import { Formik } from "formik";
-import * as yup from "yup";
-import "./RegistrationForm.css";
-
-interface FormValues {
-  username: string;
-  password: string;
-  name: string;
-  surname: string;
-  pesel: string;
-  pwz: string;
-}
-
-function RegistrationFormD() {
-  const onSubmit = useCallback(
-    (values: FormValues, formik: any) => {
-      console.log(values);
-    },
-    [],
-=======
 import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
 import { useNavigate } from "react-router-dom";
@@ -50,7 +28,6 @@ function RegistrationFormD() {
       // });
     },
     [navigate],
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   );
 
   const validationSchema = useMemo(
@@ -74,13 +51,8 @@ function RegistrationFormD() {
   );
 
   return (
-<<<<<<< HEAD
-    <div className="background">
-        <header className="header">SIGN UP</header>
-=======
     <div className="background_register">
         <header className="header_register">SIGN UP</header>
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
       <Formik
         initialValues={{ username: "", password: "", name: "", surname: "", pesel: "", pwz: ""}}
         onSubmit={onSubmit}
@@ -95,11 +67,7 @@ function RegistrationFormD() {
             noValidate
             onSubmit={formik.handleSubmit}
           >
-<<<<<<< HEAD
-              <TextField
-=======
             <TextField
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
               id="name"
               name="name"
               label="Name"
@@ -108,19 +76,11 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.name && !!formik.errors.name}
               helperText={formik.touched.name && formik.errors.name}
-<<<<<<< HEAD
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
-
-            />
-               <TextField
-=======
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
 
             />
            <TextField
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
               id="surname"
               name="surname"
               label="Surname"
@@ -129,13 +89,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.surname && !!formik.errors.surname}
               helperText={formik.touched.surname && formik.errors.surname}
-<<<<<<< HEAD
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
-=======
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
             />
             <TextField
               id="username"
@@ -146,13 +101,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.username && !!formik.errors.username}
               helperText={formik.touched.username && formik.errors.username}
-<<<<<<< HEAD
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
-=======
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
             />
             <TextField
               id="password"
@@ -164,13 +114,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.password && !!formik.errors.password}
               helperText={formik.touched.password && formik.errors.password}
-<<<<<<< HEAD
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
-=======
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
             />
 
             <TextField
@@ -182,13 +127,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.pesel && !!formik.errors.pesel}
               helperText={formik.touched.pesel && formik.errors.pesel}
-<<<<<<< HEAD
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
-=======
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
             />
 
             <TextField
@@ -200,13 +140,8 @@ function RegistrationFormD() {
               onBlur={formik.handleBlur}
               error={formik.touched.pwz && !!formik.errors.pwz}
               helperText={formik.touched.pwz && formik.errors.pwz}
-<<<<<<< HEAD
-              InputLabelProps={{ style: { fontSize: '30px' } }}
-              InputProps={{ style: { fontSize: '30px' } }}
-=======
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
             />
 
             <Button
@@ -216,10 +151,6 @@ function RegistrationFormD() {
             >
               CONFIRM
             </Button>
-<<<<<<< HEAD
-
-=======
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
           </form>
         )}
       </Formik>
@@ -227,8 +158,4 @@ function RegistrationFormD() {
   );
 }
 
-<<<<<<< HEAD
 export default RegistrationFormD;
-=======
-export default RegistrationFormD;
->>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
