@@ -1,0 +1,124 @@
+.background_patients {
+  background-image: url('../images/background.svg');
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 3.75rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.header_patients {
+  color: white;
+  margin-top: 2.5rem;
+  font-style: revert;
+  font-size: 4.375rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.625rem;
+}
+
+.table-container-wrapper {
+  margin-top: 1.875rem;
+  width: 80%;
+  display: flex;
+  justify-content: center;
+}
+
+.MuiTableCell-root {
+  border: 1px solid rgba(224, 224, 224, 1);
+}
+
+.MuiTableCell-head {
+  font-weight: bold;
+}
+
+.no-bottom-border {
+  border-bottom: none;
+}
+
+.first-row {
+  text-align: center;
+  font-weight: bold;
+}
+
+.table {
+  table-layout: fixed;
+  margin: 0 auto;
+}
+
+.table-header {
+  background-color: #cae6ff;
+  font-weight: bold;
+  text-align: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.log_out {
+  position: fixed;
+  top: 1.25rem;
+  flex-direction: column;
+  left: 1.25rem;
+  z-index: 9999;
+  width: 6.25rem;
+  height: 6.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  fill: black;
+}
+
+.log_out svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  fill: currentColor;
+}
+
+.log_out span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
+}
+
+
+.log_out:hover {
+  background-color: #f0f0f0;
+}
+
+.new_patient {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 2rem;
+  z-index: 9999;
+  width: 2rem;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.new_patient .icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  fill: black;
+}
+
+.new_patient span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
+}
+
+.new_patient:hover {
+  background-color: #f0f0f0;
+  color: black;
+}

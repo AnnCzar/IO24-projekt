@@ -1,9 +1,14 @@
 .registration-form {
+<<<<<<< HEAD
   padding: 5rem;
+=======
+  padding: 0.1rem;
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+<<<<<<< HEAD
   transform: translateY(300px);
 }
 
@@ -14,10 +19,23 @@
 }
 
 .background {
+=======
+  transform: translateY(4rem);
+}
+
+.registration-form button {
+  font-size: 1.2rem;
+  margin-top: 1.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.background_register {
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   background-image: url('../images/background.svg');
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
+<<<<<<< HEAD
   height: calc(100vh - 60px);
 }
 .header {
@@ -34,3 +52,17 @@
 
 
 
+=======
+  height: calc(100vh - 3.75rem);
+}
+
+.header_register {
+  color: white;
+  transform: translateY(4rem);
+  font-style: revert;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74

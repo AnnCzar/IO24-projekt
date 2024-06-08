@@ -19,8 +19,8 @@ from django.urls import path
 from django.views.generic import TemplateView
 
 from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
-    video_stream, start_video_processing, AddRecordingView, AddFrameView, AddFrameLandmarksView, AddSmileView, \
-    AddRefPhotoView, AddRefPhotoLandmarksView
+    video_stream, start_video_processing, AddRecordingView, AddFrameView, AddFrameLandmarksView, CapturePhotoView, \
+    delete_user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,14 +30,14 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('video-stream/', video_stream, name='video_stream'),
     path('start-video-processing/', start_video_processing, name='start_video_processing'),
+    path('capture-photo/', CapturePhotoView.as_view(), name='capture_photo'),  # capture the photo
+    path('delete-user/<int:user_id>/', delete_user, name='delete_user'),
+
 
     # paths for testing in the postman, later there will be one path ----------------
     path('addRecording/', AddRecordingView.as_view(), name='add_recording'),
     path('addFrame/', AddFrameView.as_view(), name='add_frame'),
     path('addLandmarks/', AddFrameLandmarksView.as_view(), name='add_landmarks'),
-    path('addSmile/', AddSmileView.as_view(), name='add_smile'),
-    path('addRefPhoto/', AddRefPhotoView.as_view(), name='add_ref_photo'),
-    path('addRefLandmarks/', AddRefPhotoLandmarksView.as_view(), name='add_ref_photo_landmarks'),
     # -------------------------------------
 
 
@@ -45,4 +45,3 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')),
 
 ]
-

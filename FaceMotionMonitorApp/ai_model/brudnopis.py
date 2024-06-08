@@ -1,14 +1,18 @@
 import cv2
 import mediapipe as mp
 import math
+import numpy as np
 
 mp_face_mesh = mp.solutions.face_mesh
+
 
 class VideoProcessor:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
-        self.face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True, refine_landmarks=True)
+        self.face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, refine_landmarks=True)
         self.landmark_connections, self.landmarks = self.get_points()
+        self.freeze_frame = None  # for freezing the video
+        self.is_frozen = False
 
     def __del__(self):
         self.cap.release()
@@ -25,13 +29,12 @@ class VideoProcessor:
 
     def face_center(self, points):
         sum_x, sum_y = 0, 0
-        for landmark_list in points:
-            for landmark in landmark_list:
-                landmark_index, landmark_x, landmark_y = landmark
-                sum_x += landmark_x
-                sum_y += landmark_y
-        center_x = sum_x / len(points[0])
-        center_y = sum_y / len(points[0])
+        for landmark in points:
+            landmark_index, landmark_x, landmark_y = landmark
+            sum_x += landmark_x
+            sum_y += landmark_y
+        center_x = sum_x / len(points)
+        center_y = sum_y / len(points)
         return center_x, center_y
 
     def get_points(self):
@@ -63,12 +66,11 @@ class VideoProcessor:
         right = [474, 476]
         x_landmarks = {}
         y_landmarks = {}
-        for landmark_list in landmark_points:
-            for landmark in landmark_list:
-                landmark_index, x_landmark, y_landmark = landmark
-                if landmark_index in left or landmark_index in right:
-                    x_landmarks.update({landmark_index: x_landmark})
-                    y_landmarks.update({landmark_index: y_landmark})
+        for landmark in landmark_points:
+            landmark_index, x_landmark, y_landmark = landmark
+            if landmark_index in left or landmark_index in right:
+                x_landmarks.update({landmark_index: x_landmark})
+                y_landmarks.update({landmark_index: y_landmark})
         left_width = math.sqrt(
             (x_landmarks.get(469) - x_landmarks.get(471)) ** 2 + (y_landmarks.get(469) - y_landmarks.get(471)) ** 2)
         right_width = math.sqrt(
@@ -81,40 +83,168 @@ class VideoProcessor:
         width = self.iris_width(landmark_points)
         k = width / 11  # 11 mm - average width of a human iris, k is a scale
         distances = {}
-        for landmark_list in landmark_points:
-            for landmark in landmark_list:
-                landmark_index, x_landmark, y_landmark = landmark
-                distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
-                distances[landmark_index] = distance / k
+        for landmark in landmark_points:
+            landmark_index, x_landmark, y_landmark = landmark
+            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
+            distances[landmark_index] = distance
         return distances
 
-    def process_frame(self):
-        ret, img = self.cap.read()
-        if not ret:
-            return None
+    # def process_frame(self):
+    #     ret, img = self.cap.read()
+    #     if not ret:
+    #         return None, None
+    #
+    #     results = self.face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    #     if results.multi_face_landmarks:
+    #         for face_landmark in results.multi_face_landmarks:
+    #             lms = face_landmark.landmark
+    #             d = {}
+    #             landmark_list = []
+    #             land_list = []
+    #             for index in self.landmarks:
+    #                 x = int(lms[index].x * img.shape[1])
+    #                 y = int(lms[index].y * img.shape[0])
+    #                 d[index] = (x, y)
+    #                 norm_x = lms[index].x
+    #                 norm_y = lms[index].y
+    #                 landmark_list.append((index, norm_x, norm_y))
+    #
+    #             land_list.append(landmark_list)
+    #             print(land_list)
+    #             x_center, y_center = self.face_center(landmark_list)
+    #             distances = self.calculate_distance(landmark_list)
+    #
+    #             cv2.circle(img, (int(x_center * img.shape[1]), int(y_center * img.shape[0])), 2, (255, 0, 0), -1)
+    #             for index in self.landmarks:
+    #                 cv2.circle(img, (d[index][0], d[index][1]), 2, (0, 255, 0), -1)
+    #             for conn in list(self.landmark_connections):
+    #                 cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
+    #                          (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
+    #
+    #             print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
+    #
+    #     ret, buffer = cv2.imencode('.jpg', img)
+    #     return img, buffer.tobytes()
+    #
 
+    def process_video(self, video_data):  # new version
+
+        # Convert the video data to a numpy array and then decode it
+        video_array = np.frombuffer(video_data, np.uint8)
+        cap = cv2.VideoCapture(cv2.CAP_FFMPEG, video_array)
+
+        frame_count = 0
+        all_frames_data = {}  #zestawienie wszysykich info do zapisu w bazie
+
+        while cap.isOpened():
+            ret, img = cap.read()
+            if not ret:
+                break
+            frame_count += 1
+            timestamp = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0  # Get timestamp in seconds
+            image_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            results = self.face_mesh.process(image_rgb)
+
+            frame_data = {  # dane dla jednego frame'a
+                'timestamp': timestamp,
+                'x_center': None,
+                'y_center': None,
+                'landmarks': {}
+            }
+
+            if results.multi_face_landmarks:
+                for face_landmark in results.multi_face_landmarks:
+                    lms = face_landmark.landmark
+                    d = {}
+                    landmark_list = []
+                    land_list = []
+                    for index in self.landmarks:
+                        x = int(lms[index].x * img.shape[1])
+                        y = int(lms[index].y * img.shape[0])
+                        d[index] = (x, y)
+                        norm_x = lms[index].x
+                        norm_y = lms[index].y
+                        landmark_list.append((index, norm_x, norm_y))
+
+                    land_list.append(landmark_list)
+                    print(land_list)
+                    x_center, y_center = self.face_center(landmark_list)
+                    distances = self.calculate_distance(landmark_list)
+
+                    frame_data['x_center'] = x_center
+                    frame_data['y_center'] = y_center
+                    frame_data['landmarks'] = {index: distances[index] for index, _, _ in landmark_list}
+
+
+                    # cv2.circle(img, (int(x_center * img.shape[1]), int(y_center * img.shape[0])), 2, (255, 0, 0), -1)
+
+                    # Optional: Draw landmarks on the image (for debugging or visualization)
+                    for index in self.landmarks:
+                        cv2.circle(img, (d[index][0], d[index][1]), 2, (0, 255, 0), -1)
+                    for conn in list(self.landmark_connections):
+                        cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
+                                 (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
+
+                    print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
+            all_frames_data[frame_count] = frame_data
+
+        cap.release()
+        return all_frames_data
+
+
+
+    # for capturing the photo
+    def capture_photo(self):  # almost everything is the same as in the process frame,
+        if self.freeze_frame is not None:
+            img = self.freeze_frame
+
+            results = self.face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            if results.multi_face_landmarks:
+                for face_landmark in results.multi_face_landmarks:
+                    lms = face_landmark.landmark
+                    d = {}
+                    landmark_list = []
+                    for index in self.landmarks:
+                        x = int(lms[index].x * img.shape[1])
+                        y = int(lms[index].y * img.shape[0])
+                        d[index] = (x, y)
+                        norm_x = lms[index].x
+                        norm_y = lms[index].y
+                        landmark_list.append((index, norm_x, norm_y))
+
+                    x_center, y_center = self.face_center(landmark_list)
+                    distances = self.calculate_distance(landmark_list)
+
+                    cv2.circle(img, (int(x_center * img.shape[1]), int(y_center * img.shape[0])), 2, (255, 0, 0), -1)
+                    for index in self.landmarks:
+                        cv2.circle(img, (d[index][0], d[index][1]), 2, (0, 255, 0), -1)
+                    for conn in list(self.landmark_connections):
+                        cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
+                                 (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
+
+                    print(f"Photo center: ({x_center}, {y_center}), Distances: {distances}")
+
+            ret, buffer = cv2.imencode('.jpg', img)
+            return img, buffer.tobytes(), landmark_list, distances, x_center, y_center
+
+    # nowa wersja z przesłaniem zdjecia  z fronta
+    def capture_photo(self, img):
         results = self.face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         if results.multi_face_landmarks:
             for face_landmark in results.multi_face_landmarks:
                 lms = face_landmark.landmark
                 d = {}
-                land_list = []
-                line = []
+                landmark_list = []
                 for index in self.landmarks:
                     x = int(lms[index].x * img.shape[1])
                     y = int(lms[index].y * img.shape[0])
                     d[index] = (x, y)
                     norm_x = lms[index].x
                     norm_y = lms[index].y
-                    line.append((index, norm_x, norm_y))
+                    landmark_list.append((index, norm_x, norm_y))
 
-                # printing landmarks just for now
-                land_list.append(line)
-                print(land_list)
-                x_center, y_center = self.face_center(land_list)
-                print(x_center, y_center)
-                distances = self.calculate_distance(land_list)
-                print(distances)
+                x_center, y_center = self.face_center(landmark_list)
+                distances = self.calculate_distance(landmark_list)
 
                 cv2.circle(img, (int(x_center * img.shape[1]), int(y_center * img.shape[0])), 2, (255, 0, 0), -1)
                 for index in self.landmarks:
@@ -123,19 +253,37 @@ class VideoProcessor:
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-        # it writes a JPEG-compressed image into a memory buffer (RAM) instead of to disk
+                print(f"Photo center: ({x_center}, {y_center}), Distances: {distances}")
+
         ret, buffer = cv2.imencode('.jpg', img)
-        return buffer.tobytes()  # changes the frame into bytes
+        return img, buffer.tobytes(), landmark_list, distances, x_center, y_center
 
     def display_video(self):
         while True:
-            img = self.process_frame()
-            if img is None:
-                break
-            cv2.imshow('frame', cv2.flip(img, 1))
+            if not self.is_frozen:
+                img, img_bytes = self.process_frame()
+                if img is None:
+                    break
+                self.freeze_frame = img
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            decoded_img = cv2.imdecode(np.frombuffer(cv2.imencode('.jpg', self.freeze_frame)[1], np.uint8),
+                                       cv2.IMREAD_COLOR)
+            cv2.imshow('frame', cv2.flip(decoded_img, 1))
+
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
                 break
+            elif key == ord('p'):
+                self.is_frozen = not self.is_frozen
+                if self.is_frozen:
+                    self.capture_photo()
+                else:
+                    self.freeze_frame = None
 
         self.cap.release()
         cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    processor = VideoProcessor()
+    processor.display_video()

@@ -1,18 +1,30 @@
 .examination {
+<<<<<<< HEAD
   padding: 5rem;
+=======
+  padding: 0.1rem;
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+<<<<<<< HEAD
   transform: translateY(300px);
 }
 
 
 .background {
+=======
+  transform: translateY(3rem);
+}
+
+.background_ex {
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   background-image: url('../images/background.svg');
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
+<<<<<<< HEAD
   height: calc(100vh - 60px);
 }
 
@@ -48,12 +60,40 @@
   z-index: 9999;
   width: 120px;
   height: 120px;
+=======
+  height: calc(100vh - 3.75rem);
+}
+
+.examination button {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}
+
+.header_ex {
+  color: white;
+  transform: translateY(2rem);
+  font-style: revert;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.myButton {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 9999;
+  width: 6.5rem;
+  height: 6.5rem;
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   background: transparent;
   border: none;
+<<<<<<< HEAD
   fill: black;
 }
 
@@ -70,14 +110,33 @@
 
 .myButton:hover {
   background-color: #f0f0f0;
+=======
+}
+
+.myButton svg {
+  width: 5rem;
+  height: 5rem;
+}
+
+.myButton span {
+  margin-top: 0.3125rem;
+  font-size: 1.2rem;
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
 }
 
 .reportsButton {
   position: fixed;
+<<<<<<< HEAD
   bottom: 20px;
   right: 20px;
   z-index: 9999;
   width: 120px;
+=======
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  width: 6.5rem;
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   height: auto;
   display: flex;
   flex-direction: column;
@@ -89,6 +148,7 @@
 }
 
 .reportsButton .icon {
+<<<<<<< HEAD
   width: 60px;
   height: 60px;
   fill: black;
@@ -110,3 +170,13 @@
 
 
 
+=======
+  width: 5rem;
+  height: 5rem;
+}
+
+.reportsButton span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
+}
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74

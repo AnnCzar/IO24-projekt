@@ -1,18 +1,30 @@
 .reference-photo {
+<<<<<<< HEAD
   padding: 5rem;
+=======
+  padding: 0.1rem;
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+<<<<<<< HEAD
   transform: translateY(300px);
 }
 
 
 .background {
+=======
+  transform: translateY(1rem);
+}
+
+.background_photo {
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
   background-image: url('../images/background.svg');
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
+<<<<<<< HEAD
   height: calc(100vh - 60px);
 }
 
@@ -44,3 +56,34 @@
 
 
 
+=======
+  height: calc(90vh - 4rem);
+}
+
+.webcam-container {
+  width: 100vw;
+  height: 55vh;
+  max-width: 100rem;
+}
+
+.webcam-container video {
+    width: 100vw;
+  height: 55vh;
+}
+
+.header_photo {
+  color: white;
+  transform: translateY(2rem);
+  font-style: revert;
+  font-size: 4.375rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.reference-photo button {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0rem;
+}
+>>>>>>> 4f8e8928bd28cb793509ea012c132fe2d42fba74
