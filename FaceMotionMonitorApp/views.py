@@ -4,7 +4,8 @@ from datetime import date
 import cv2
 import numpy as np
 from django.contrib.auth.hashers import make_password
-from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpResponse, JsonResponse
+from django.views import View
 from rest_framework import views
 from rest_framework.decorators import api_view
 
@@ -219,6 +220,15 @@ class LoginView(APIView):  #not working how I want - TO FIX
         else:
             # Obsłuż błąd uwierzytelniania
             return Response('Nieprawidłowe dane logowania', status=400)
+
+class GetUserRoleView(View):
+    def get(self, request):
+        username = request.GET.get('login')
+        try:
+            user = Auth.objects.get(login=login)
+            return JsonResponse({'role': user.role})
+        except Auth.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
 
 
 # class AddExamiantionView(views.APIView):   #its not working, dont delete

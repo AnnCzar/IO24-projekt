@@ -127,7 +127,4 @@ function RegistrationFormP() {
     </div>
   );
 }
-
-export default RegistrationFormP;
-
 export default RegistrationFormP;

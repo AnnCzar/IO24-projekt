@@ -19,3 +19,10 @@ class AuthBackend(object):
             return Auth.objects.get(pk=user_id)
         except Auth.DoesNotExist:
             return None
+
+    def get_user_role(self, login):
+        try:
+            user = Auth.objects.get(login)
+            return user.role
+        except Auth.DoesNotExist:
+            return None

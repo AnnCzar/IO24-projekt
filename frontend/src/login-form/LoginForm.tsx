@@ -5,17 +5,40 @@ import * as yup from "yup";
 import { Link } from 'react-router-dom';
 import RoleChoice from "../role-choice/RoleChoice";
 import "./LoginForm.css";
+import logo from "../images/Logo1.svg";
 
 interface FormValues {
   username: string;
   password: string;
 }
 
+
 function LoginForm() {
   const [showRoleChoice, setShowRoleChoice] = useState(false);
+  const [role, setRole] = useState(""); // Stan przechowujący rolę użytkownika
 
-  const onSubmit = useCallback((values: FormValues, formik: any) => {
-    console.log(values);
+  const handleSubmit = async (values: FormValues, setRole: Function, e: any) => {
+  e.preventDefault();
+
+  const { username, password } = values;
+
+  try {
+    const response = await fetch(`/get-user-role/?login=${username}`);
+    if (response.ok) {
+      const data = await response.json();
+      const userRole = data.role;
+      setRole(userRole); // Ustawienie roli użytkownika w stanie komponentu
+    } else {
+      console.error('Failed to fetch user role');
+    }
+  } catch (error) {
+    console.error('Error while fetching role:', error);
+    alert('Login failed.');
+  }
+};
+
+  const onSubmit = useCallback(async (values: FormValues, formik: any) => {
+    await handleSubmit(values, setRole, null); // Przekazanie funkcji setRole jako argument
   }, []);
 
   const validationSchema = useMemo(
@@ -30,10 +53,6 @@ function LoginForm() {
     []
   );
 
-  // const handleRegistrationLinkClick = () => {
-  //   setShowRoleChoice(true);
-  // };
-
   return (
     <div className="background_login">
       {showRoleChoice ? (
@@ -41,6 +60,7 @@ function LoginForm() {
       ) : (
         <div>
           <header className="header_login">SIGN IN</header>
+
           <Formik
             initialValues={{ username: "", password: "" }}
             onSubmit={onSubmit}
@@ -89,7 +109,7 @@ function LoginForm() {
                   type="submit"
                   disabled={!(formik.isValid && formik.dirty)}
                   component={Link}
-                  to={"/patients"}
+                  to={role === 'DOCTOR' ? "/patients" : "/examination"}
                 >
                   SIGN IN
                 </Button>
@@ -104,6 +124,8 @@ function LoginForm() {
               </form>
             )}
           </Formik>
+
+          <img src={logo} alt="Logo" className="logo_bottom" />
         </div>
       )}
     </div>
