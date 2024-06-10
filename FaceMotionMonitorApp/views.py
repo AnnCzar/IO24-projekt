@@ -302,6 +302,7 @@ class CapturePhotoView(APIView):
             return HttpResponse("Failed to capture photo.", status=500)
         return HttpResponse(img_bytes, content_type='image/jpeg')
 
+
 @api_view(['GET'])   # streams the video frames to the client
 def video_stream(request):
     return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
