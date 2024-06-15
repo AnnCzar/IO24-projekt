@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'FaceMotionMonitor.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ffm_database',
+        'NAME': 'fmm_database',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '127.0.0.1',

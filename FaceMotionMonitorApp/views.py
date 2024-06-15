@@ -8,20 +8,15 @@ from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpRespons
 from django.views import View
 from rest_framework import views
 from rest_framework.decorators import api_view
-
 from .ai_model.brudnopis import VideoProcessor
 from .backends.auth_backend import AuthBackend
 from .models import Role, Sex, UserProfile
-from .models.userProfile_models import Patient, Doctor, Auth, DoctorAndPatient
 from .serializers import *
 from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import LoginSerializer
-
-
-# twoje funkcje/klasy widoków
+from .services import get_patient_details
 
 
 class DoctorRegistration(views.APIView):
@@ -32,8 +27,8 @@ class DoctorRegistration(views.APIView):
         login1 = request.data['login']
         # checking if the user exists
 
-        if role_vale == Role.DOCTOR.value and validate_email(email) == False and validate_login(
-                login1) == False and validate_pwz_pwzf(pwz) == False:
+        if role_vale == Role.DOCTOR.value and not (
+                validate_email(email) and validate_login(login1) and validate_pwz_pwzf(pwz)):
 
             user_profile_serializer = UserProfileSerializer(data=request.data)
             if user_profile_serializer.is_valid():
@@ -59,8 +54,8 @@ class DoctorRegistration(views.APIView):
                     doctor_serializer.save()
                     return Response(auth_serializer.data, status=status.HTTP_201_CREATED)
                 else:
-                    return Response(doctor_serializer.errors or auth_serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+                    errors = {**auth_serializer.errors, **doctor_serializer.errors}
+                    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(user_profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -74,6 +69,15 @@ class AddPatient(views.APIView):
         role_vale = Role['PATIENT'].value
         pesel = request.data['pesel']
 
+        try:
+            # Get user_id from session
+            user_id = request.session.get('user_id')
+            doctor = Doctor.objects.get(user_id=user_id)
+            doctor_id = doctor.id
+        except Doctor.DoesNotExist:
+            return Response({'error': 'User is not logged in or session has expired'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
         if UserProfile.objects.filter(pesel=pesel).exists():  #patient exists
             user_profile = UserProfile.objects.get(pesel=pesel)
             user_id = user_profile.id
@@ -81,10 +85,6 @@ class AddPatient(views.APIView):
             patient = Patient.objects.get(user_id=user_id)
             patient_id = patient.id
 
-            try:
-                doctor_id = int(request.data['doctor_id'])
-            except ValueError:
-                return Response({"error": "Invalid doctor_id"}, status=status.HTTP_400_BAD_REQUEST)
             doctor_user_id = Doctor.objects.get(id=doctor_id).user_id
 
             if Auth.objects.get(id=doctor_user_id).role == Role['DOCTOR'].value:
@@ -201,39 +201,23 @@ class PatientRegistration(views.APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginView(APIView):  #not working how I want - TO FIX
-
-    #TODO fix it and read about session
-
+class LoginView(APIView):
     def post(self, request):
         login_value = request.data.get('login')
         password = request.data.get('password')
 
-        auth_backend = AuthBackend()  # Tworzenie instancji własnego backendu
+        auth_backend = AuthBackend()
         user = auth_backend.authenticate(request, login=login_value, password=password)
 
         if user is not None:
             # Przekazanie nazwy backendu
             request.session['user_role'] = user.role
+            request.session['user_id'] = user.id_id
             return Response('User logged in', status=status.HTTP_200_OK)
-            # return HttpResponseRedirect('/success-url/')  # Przekierowanie po zalogowaniu
         else:
-            # Obsłuż błąd uwierzytelniania
+
             return Response('Nieprawidłowe dane logowania', status=400)
 
-# class LoginView(APIView):
-#     def post(self, request):
-#         login_value = request.data.get('login')
-#         password = request.data.get('password')
-#
-#         auth_backend = AuthBackend()
-#         user = auth_backend.authenticate(request, login=login_value, password=password)
-#
-#         if user is not None:
-#             request.session['user_role'] = user.role
-#             return Response({'user_role': user.role}, status=status.HTTP_200_OK)
-#         else:
-#             return Response('Invalid login credentials', status=status.HTTP_400_BAD_REQUEST)
 
 class GetUserRoleView(View):
     def get(self, request):
@@ -243,63 +227,6 @@ class GetUserRoleView(View):
             return JsonResponse({'role': user.role})
         except Auth.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=404)
-
-
-# class AddExamiantionView(views.APIView):   #its not working, dont delete
-#     def post(self, request):
-#         if 'patient_id' not in request.data:  # change it later, use session
-#             return Response({'error': 'Patient ID is required'}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         patient_id = request.data['patient_id']
-#         try:
-#             patient = UserProfile.objects.get(id=patient_id)
-#         except UserProfile.DoesNotExist:
-#             return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
-#
-#         data = request.data
-#         data['patient_id'] = patient.id
-#
-#         recording_serializer = RecordingsSerializer(data=data)
-#         if recording_serializer.is_valid():
-#             recording = recording_serializer.save()
-#             return Response(recording_serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(recording_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class AddRecordingView(views.APIView):  #adding info about recordings to database
-    def post(self, request):
-        #here add a function that divides the recording into frames?
-        #How to get  the time of the recording?
-
-        recordings_serializer = RecordingsSerializer(data=request.data)
-        if recordings_serializer.is_valid():
-            recordings_serializer.save()
-            return Response(recordings_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class AddFrameView(views.APIView):  #adding info about frame to database
-    def post(self, request):
-        # move this code to 'generate_frame' and there refer to function which generete center point ???????
-        frames_serializer = FramesSerializer(data=request.data)
-        if frames_serializer.is_valid():
-            frames_serializer.save()
-            return Response(frames_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(frames_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class AddFrameLandmarksView(views.APIView):
-    # IDEA: merge this code with code from 'AddFrameView'
-    def post(self, request):
-        frame_landmarks_serializer = FrameLandmarksSerializer(data=request.data)
-        if frame_landmarks_serializer.is_valid():
-            frame_landmarks_serializer.save()
-            return Response(frame_landmarks_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(frame_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def generate_frames():
@@ -322,7 +249,6 @@ def generate_frames():
 #
 
 
-# version with save to the database
 class CapturePhotoView(APIView):
     def post(self, request):
         data = request.data
@@ -387,7 +313,9 @@ def add_recording(request):
 
     # Process video through AI model
     processor = VideoProcessor()
-    all_frames_data = processor.process_video(video_data)
+    all_frames_data, frame_number_with_max_distance = processor.process_video(video_data)
+
+    landmarks_data = []
 
     recording_data = {
         'date': date.today(),
@@ -400,7 +328,19 @@ def add_recording(request):
         recording = recordings_serializer.save()
 
         # Save frames and landmarks to database
+
         for frame_number, frame_data in all_frames_data:
+
+            if frame_number_with_max_distance == frame_number:
+                landmark_numbers = [61, 291, 55, 285]
+                for landmark_number in frame_data['landmark_number']:
+                    if landmark_number in landmark_numbers:
+                        landmarks_data.append({
+                            'landmark_index': landmark_number.landmark_index,
+                            'distance': landmark_number.distance,
+                        })
+            else:
+                pass
 
             frame_serializer = FramesSerializer(data={
                 'recording': recording.id,
@@ -419,10 +359,27 @@ def add_recording(request):
                     })
                     if landmark_serializer.is_valid():
                         landmark_serializer.save()
+        mouth_diff, eyebrow_diff = calculate_diference(landmarks_data)
+        report_data = {
+            'date': date.today(),
+            'difference_mouth': mouth_diff,
+            'difference_2': eyebrow_diff,
+            'patient_id': recording_data['patient_id'],
+        }
+        Reports.objects.create(**report_data)
 
         return Response(recordings_serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# to trzeba wywalic stad i dac gdzies indziej
+def calculate_diference(landmarks_data):
+    distances = [data['distance'] for data in landmarks_data]
+    mouth_diff = 0  # usun to
+    eyebrow_diff = 0
+
+    return mouth_diff, eyebrow_diff
 
 
 @api_view(['DELETE'])
@@ -432,23 +389,20 @@ def delete_user(request, user_id):
         Auth.objects.filter(id=user_id).delete()
 
         # Sprawdzenie czy użytkownik jest pacjentem
-        if Patient.objects.filter(user_id=user_id).exists():
-            # Usunięcie danych z tabeli Patient
-            Patient.objects.filter(user_id=user_id).delete()
+        patient = Patient.objects.filter(user_id=user_id).first()
+        if patient:
+            patient_id = patient.id
+            patient.delete()
+            # Usunięcie przypisania do pacjenta
+            DoctorAndPatient.objects.filter(patient_id=patient_id).delete()
 
         # Sprawdzenie czy użytkownik jest lekarzem
-        if Doctor.objects.filter(user_id=user_id).exists():
-            # Usunięcie danych z tabeli Doctor
-            Doctor.objects.filter(user_id=user_id).delete()
-
-        # Sprawdzenie czy użytkownik jest przypisany do jakiegoś lekarza lub pacjenta
-        if DoctorAndPatient.objects.filter(doctor_id=user_id).exists():
+        doctor = Doctor.objects.filter(user_id=user_id).first()
+        if doctor:
+            doctor_id = doctor.id
+            doctor.delete()
             # Usunięcie przypisania do lekarza
-            DoctorAndPatient.objects.filter(doctor_id=user_id).delete()
-
-        if DoctorAndPatient.objects.filter(patient_id=user_id).exists():
-            # Usunięcie przypisania do pacjenta
-            DoctorAndPatient.objects.filter(patient_id=user_id).delete()
+            DoctorAndPatient.objects.filter(doctor_id=doctor_id).delete()
 
         # Usunięcie danych z tabeli UserProfile
         UserProfile.objects.filter(id=user_id).delete()
@@ -458,33 +412,102 @@ def delete_user(request, user_id):
 
     except Exception as e:
         # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
-        return Response({'error': 'Failed to delete user'}, status=500)
-
-# def addRefPhotoView(request):
-#     ref_photos_serializer = RefPhotosSerializer(data=request.data)
-#     if ref_photos_serializer.is_valid():
-#         ref_photos_serializer.save()
-#         return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
-#     else:
-#         return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-
-# class AddRefPhotoView(views.APIView):
-#     def post(self, request):
-#         ref_photos_serializer = RefPhotosSerializer(data=request.data)
-#         if ref_photos_serializer.is_valid():
-#             ref_photos_serializer.save()
-#             return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
 
 
-# class AddRefPhotoLandmarksView(views.APIView):
-#     # IDEA: merge this code with code from 'AddRefPhotoView'
-#     def post(self, request):
-#         ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(data=request.data)
-#         if ref_photos_landmarks_serializer.is_valid():
-#             ref_photos_landmarks_serializer.save()
-#             return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+def get_patients_by_doctor(request):
+    try:
+        # Get user_id from session
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return Response({'error': 'User is not logged in or session has expired'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        # Retrieve the doctor associated with this user_id
+        try:
+            doctor = Doctor.objects.get(user_id=user_id)
+        except Doctor.DoesNotExist:
+            return Response({'error': 'No doctor found for this user'}, status=status.HTTP_404_NOT_FOUND)
+
+        doctor_id = doctor.id
+
+        # Find all patient IDs associated with the given doctor ID
+        doctor_patient_relations = DoctorAndPatient.objects.filter(doctor_id=doctor_id)
+        patient_ids = doctor_patient_relations.values_list('patient_id', flat=True)
+
+        # Fetch patient data
+        patients = Patient.objects.filter(id__in=patient_ids).select_related('user_id')
+
+        # Serialize the patient data
+        serializer = PatientSerializer(patients, many=True)
+
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_reports_for_doctor_view(request, patient_id):
+    try:
+        # Get user_id from session
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return Response({'error': 'User is not logged in or session has expired'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        # Retrieve the doctor associated with this user_id
+        try:
+            doctor = Doctor.objects.get(user_id=user_id)
+        except Doctor.DoesNotExist:
+            return Response({'error': 'No doctor found for this user'}, status=status.HTTP_404_NOT_FOUND)
+
+        doctor_id = doctor.id
+        # Find all patient IDs associated with the given doctor ID
+        if DoctorAndPatient.objects.filter(doctor_id=doctor_id, patient_id=patient_id).exists():
+            reports = Reports.objects.filter(patient_id=patient_id)
+
+            serializer = ReportsSerializer(reports, many=True)
+            return Response(serializer.data)
+
+
+    except Reports.DoesNotExist:
+        return Response({'error': 'No reports found for this patient'}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def patient_details_view(request):
+    user_doctor_id = request.session.get('user_id')
+    details = get_patient_details(request)
+    return Response(details, status=200)
+
+
+@api_view(['GET'])
+def get_reports_for_patient_view(request):
+    try:
+        # Get user_id from session
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return Response({'error': 'User is not logged in or session has expired'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+        # Retrieve the doctor associated with this user_id
+        try:
+            patient_id = Patient.objects.get(user_id=user_id).id
+        except Patient.DoesNotExist:
+            return Response({'error': 'No patient found for this user'}, status=status.HTTP_404_NOT_FOUND)
+
+        reports = Reports.objects.filter(patient_id=patient_id)
+
+        serializer = ReportsSerializer(reports, many=True)
+        return Response(serializer.data)
+
+
+    except Reports.DoesNotExist:
+        return Response({'error': 'No reports found for this patient'}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
