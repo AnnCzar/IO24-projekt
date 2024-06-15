@@ -22,6 +22,7 @@ from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient
     video_stream, start_video_processing, AddRecordingView, AddFrameView, AddFrameLandmarksView, CapturePhotoView, \
     delete_user, GetUserRoleView
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', DoctorRegistration.as_view(), name='register-doctor'),

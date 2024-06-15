@@ -221,6 +221,20 @@ class LoginView(APIView):  #not working how I want - TO FIX
             # Obsłuż błąd uwierzytelniania
             return Response('Nieprawidłowe dane logowania', status=400)
 
+# class LoginView(APIView):
+#     def post(self, request):
+#         login_value = request.data.get('login')
+#         password = request.data.get('password')
+#
+#         auth_backend = AuthBackend()
+#         user = auth_backend.authenticate(request, login=login_value, password=password)
+#
+#         if user is not None:
+#             request.session['user_role'] = user.role
+#             return Response({'user_role': user.role}, status=status.HTTP_200_OK)
+#         else:
+#             return Response('Invalid login credentials', status=status.HTTP_400_BAD_REQUEST)
+
 class GetUserRoleView(View):
     def get(self, request):
         username = request.GET.get('login')
