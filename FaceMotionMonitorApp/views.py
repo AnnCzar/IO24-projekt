@@ -359,7 +359,7 @@ def add_recording(request):
                     })
                     if landmark_serializer.is_valid():
                         landmark_serializer.save()
-        mouth_diff, eyebrow_diff = calculate_diference(landmarks_data)
+        mouth_diff, eyebrow_diff = calculate_difference(landmarks_data)
         report_data = {
             'date': date.today(),
             'difference_mouth': mouth_diff,
@@ -374,7 +374,7 @@ def add_recording(request):
 
 
 # to trzeba wywalic stad i dac gdzies indziej
-def calculate_diference(landmarks_data):
+def calculate_difference(landmarks_data):
     distances = [data['distance'] for data in landmarks_data]
     mouth_diff = 0  # usun to
     eyebrow_diff = 0

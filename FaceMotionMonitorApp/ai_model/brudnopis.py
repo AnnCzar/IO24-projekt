@@ -85,9 +85,27 @@ class VideoProcessor:
         distances = {}
         for landmark in landmark_points:
             landmark_index, x_landmark, y_landmark = landmark
-            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
+            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2) /k
             distances[landmark_index] = distance
         return distances
+
+    def calculate_distance_mouth(self, landmark_points):
+        # 61 - left mouth corner
+        # 291 - right mouth corner
+        width = self.iris_width(landmark_points)
+        k = width / 11 #scale
+        x = []
+        y = []
+        for landmark in landmark_points:
+            landmark_index, x_landmark, y_landmark = landmark
+            if landmark_index == 61 or landmark_index == 291:
+                x.append(x_landmark)
+                y.append(y_landmark)
+        distance = math.sqrt((x[0] - x[1]) ** 2 + (y[0] - y[1]) ** 2) /k
+        return distance
+
+
+
 
     # def process_frame(self):
     #     ret, img = self.cap.read()
