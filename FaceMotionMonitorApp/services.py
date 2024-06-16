@@ -284,6 +284,10 @@ def get_users_with_roles():
 # FOR REPORTS
 def get_landmarks_for_patient(patient_id):
     landmark_numbers = [61, 291, 55, 285]
+    # 61 -left mouth corner
+    # 291 - right mouth corner
+    # 55 - left brow (inner corner)
+    # 285 - right brow (inner corner)
 
     try:
         # Pobierz wszystkie zdjęcia referencyjne dla danego pacjenta
