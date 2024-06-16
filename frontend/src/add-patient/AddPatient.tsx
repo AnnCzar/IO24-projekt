@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import "./AddPatient.css";
 
 import { ReactComponent as GoBack } from "../images/back.svg";
+import axios from "axios";
 
 interface FormValues {
   name: string;
@@ -30,15 +31,38 @@ interface FormValues {
 function AddPatient() {
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
-  const onSubmit = useCallback(
-    (values: FormValues, formik: any) => {
-      console.log(values);
-      setSuccessMessage("User has been successfully added!");
+
+    const onSubmit = useCallback(     //ania
+    async (values: FormValues, formik: any) => {
+        console.log(values)
+
+      try {
+        const response = await fetch('http://localhost:8000/addPatient/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ name: values.name, surname: values.surname, email: values.email, pesel: values.pesel,
+                date_of_birth: values.date_of_birth, date_of_diagnosis: values.date_of_diagnosis, sex: values.sex}),
+        });
+
+        console.log(response.url)
+        if (response.status === 201) {
+          setSuccessMessage("User has been successfully added!");
+          formik.resetForm();
+        } else {
+          setErrorMessage("Failed to add user. Please try again.");
+        }
+      } catch (error) {
+        setErrorMessage("An error occurred. Please try again.");
+      }
     },
     [],
   );
@@ -70,6 +94,13 @@ function AddPatient() {
               textAlign: 'center',
               zIndex: 9999
           }}>{successMessage}</Alert>}
+           {errorMessage && <Alert severity="error" style={{
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 9999
+      }}>{errorMessage}</Alert>}
               <Formik
                   initialValues={{
                       name: "",
@@ -133,10 +164,10 @@ function AddPatient() {
                                           onChange={formik.handleChange}
                                           onBlur={formik.handleBlur}
                                       >
-                                          <FormControlLabel value="female" control={<Radio/>}
+                                          <FormControlLabel value="FEMALE" control={<Radio/>}
                                                             label={<span style={{fontSize: '1.25rem'}}>F</span>}
                                                             style={{marginTop: '0.625rem'}}/>
-                                          <FormControlLabel value="male" control={<Radio/>}
+                                          <FormControlLabel value="MALE" control={<Radio/>}
                                                             label={<span style={{fontSize: '1.25rem'}}>M</span>}
                                                             style={{marginTop: '0.625rem'}}/>
                                       </RadioGroup>

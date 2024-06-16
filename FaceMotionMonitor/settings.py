@@ -54,6 +54,19 @@ MIDDLEWARE = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
+SESSION_COOKIE_AGE = 86400  # 1 day in seconds
+
+SESSION_COOKIE_SECURE = False  # Use only for HTTPS
+SESSION_COOKIE_HTTPONLY = True  #
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3002',  # ZAMIENCIE SOBIE W ZALEZNOSCI JAKI PORT NA FRONT
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 ROOT_URLCONF = 'FaceMotionMonitor.urls'
 
 TEMPLATES = [
@@ -154,3 +167,4 @@ LOGGING = {
         },
     },
 }
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'

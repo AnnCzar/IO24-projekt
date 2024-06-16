@@ -70,22 +70,26 @@ class AddPatient(views.APIView):
     #TODO add data validation (if pesel is in DB, check if the user is the patient)
     def post(self, request):
         role_vale = Role['PATIENT'].value
-        pesel = request.data['pesel']
+        pesel = request.data.get('pesel')
 
         try:
             # Get user_id from session
             user_id = request.session.get('user_id')
-            doctor = Doctor.objects.get(user_id=user_id)
+
+
+            doctor = Doctor.objects.get(user_id_id=user_id)  #tutaj jest problem
+            print(doctor)
             doctor_id = doctor.id
         except Doctor.DoesNotExist:
             return Response({'error': 'User is not logged in or session has expired'},
                             status=status.HTTP_401_UNAUTHORIZED)
-
+        # user_id = 32
+        # doctor_id = 4
         if UserProfile.objects.filter(pesel=pesel).exists():  #patient exists
             user_profile = UserProfile.objects.get(pesel=pesel)
             user_id = user_profile.id
 
-            patient = Patient.objects.get(user_id=user_id)
+            patient = Patient.objects.get(user_id_id=user_id)
             patient_id = patient.id
 
             doctor_user_id = Doctor.objects.get(id=doctor_id).user_id
@@ -114,10 +118,10 @@ class AddPatient(views.APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
         else:  #creating new patient
             user_profile_serializer = UserProfileSerializer(data=request.data)
-            try:
-                doctor_id = int(request.data['doctor_id'])
-            except ValueError:
-                return Response({"error": "Invalid doctor_id"}, status=status.HTTP_400_BAD_REQUEST)
+            # try:
+            #     doctor_id = int(request.data['doctor_id'])
+            # except ValueError:
+            #     return Response({"error": "Invalid doctor_id"}, status=status.HTTP_400_BAD_REQUEST)
             doctor_user_id = Doctor.objects.get(id=doctor_id).user_id
 
             if user_profile_serializer.is_valid() and Auth.objects.get(id=doctor_user_id).role == Role['DOCTOR'].value:
@@ -237,6 +241,8 @@ class LoginView(APIView):
             # Przekazanie nazwy backendu
             request.session['user_role'] = user.role
             request.session['user_id'] = user.id_id
+            request.session.modified = True
+            request.session.save()
             return Response({'message': 'User logged in', 'role': user.role, 'user_id': user.id_id}, status=status.HTTP_200_OK)
         else:
 
@@ -556,3 +562,14 @@ def get_reports_for_patient_view(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        try:
+            # Clear the session data
+            request.session.flush()
+            return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

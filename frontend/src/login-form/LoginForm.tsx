@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { Link } from 'react-router-dom';
 import "./LoginForm.css";
 import logo from "../images/Logo1.svg";
+import { useNavigate } from 'react-router-dom';
 
 interface FormValues {
     username: string;
@@ -13,7 +14,7 @@ interface FormValues {
 
 const LoginForm: React.FC = () => {
     const [loginError, setLoginError] = React.useState<string>("");
-
+    const navigate = useNavigate();
     const onSubmit = async (values: FormValues) => {
         try {
             const response = await fetch('http://localhost:8000/login/', {
@@ -21,6 +22,7 @@ const LoginForm: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ login: values.username, password: values.password }),
             });
 
@@ -30,9 +32,10 @@ const LoginForm: React.FC = () => {
                     const role = data.role;
                     console.log('Login successful:', role);
                     if (role == 'doctor') {
-                        window.location.href = "/patients";
+
+                         navigate('/patients');
                     } else {
-                        window.location.href = "/examination";
+                        navigate('/examination');
                     }
                 } catch (error) {
                     console.error('Failed to parse JSON:', error);
