@@ -8,6 +8,8 @@ from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpRespons
 from django.views import View
 from rest_framework import views
 from rest_framework.decorators import api_view
+
+from . import services
 from .ai_model.brudnopis import VideoProcessor
 from .backends.auth_backend import AuthBackend
 from .models import Role, Sex, UserProfile
@@ -360,10 +362,10 @@ def add_recording(request):
                     })
                     if landmark_serializer.is_valid():
                         landmark_serializer.save()
-        mouth_diff, eyebrow_diff = calculate_difference(landmark_list, recording_data['patient_id'])
+        mouth, eyebrow_diff = calculate_difference(landmark_list, recording_data['patient_id'])
         report_data = {
             'date': date.today(),
-            'difference_mouth': mouth_diff,
+            'difference_mouth': mouth,
             'difference_2': eyebrow_diff,
             'patient_id': recording_data['patient_id'],
         }
@@ -380,19 +382,19 @@ def calculate_difference(landmark_list, patient_id):
     processor = VideoProcessor()
 
     #odleglosci z obecnego pomiaru
-    current_mouth = processor.calculate_distance_mouth(landmark_list)
+    # na razie mamy mouth - odległość między kącikami ust, bez porównaniado zdjęcia bazowego - można ewentualnie zmienić na koniec
+    mouth = processor.calculate_distance_mouth(landmark_list)
     current_eyebrow = (processor.calculate_distance(landmark_list)[55] + processor.calculate_distance(landmark_list)[285]) / 2  #srednia odleglosci brwi od srodka
 
     #odleglosci z base photo
-    ref_landmarks = get_ref_photo_landmarks(patient_id)
-    ref_mouth = processor.calculate_distance_mouth(ref_landmarks)
+    ref_landmarks = services.get_ref_distances_for_landmarks(patient_id, [55, 285])
+    # ref_mouth = processor.calculate_distance_mouth(ref_landmarks)
     ref_eyebrow = processor.calculate_distance(ref_landmarks[55] + processor.calculate_distance(ref_landmarks[285])) / 2 #srednia odleglosc brwi od srodka dla reference photo
 
-    #roznica pomiedzy obecnym wynikiem a ze zdjecia bazowego
 
-    mouth_diff = current_mouth - ref_mouth
+    # roznica pomiedzy obecnym wynikiem a ze zdjecia bazowego
     eyebrow_diff = current_eyebrow - ref_eyebrow
-    return mouth_diff, eyebrow_diff
+    return mouth, eyebrow_diff
 
 
 @api_view(['DELETE'])
@@ -427,14 +429,14 @@ def delete_user(request, user_id):
         # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
         return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
 
-def get_ref_photo_landmarks(patient_id):
-    ref_photo = RefPhotos.objects.get(user_id=patient_id)
-    ref_photo_id = ref_photo.id
-    ref_photo_landmarks = RefPhotoLandmarks.objects.filter(ref_photo_id=ref_photo_id)
-    landmarks_list = []
-    for landmark in ref_photo_landmarks:
-        landmarks_list.append([landmark.landmark_number, landmark.distance])
-    return landmarks_list
+# def get_ref_photo_landmarks(patient_id):
+#     ref_photo = RefPhotos.objects.get(user_id=patient_id)
+#     ref_photo_id = ref_photo.id
+#     ref_photo_landmarks = RefPhotoLandmarks.objects.filter(ref_photo_id=ref_photo_id)
+#     landmarks_list = []
+#     for landmark in ref_photo_landmarks:
+#         landmarks_list.append([landmark.landmark_number, landmark.distance])
+#     return landmarks_list
 
 @api_view(['GET'])
 def get_patients_by_doctor(request):

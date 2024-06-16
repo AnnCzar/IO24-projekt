@@ -4,11 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from datetime import date
+from FaceMotionMonitorApp import services, views
 
-#
-#
-# brudnopisowa wersja
-#
+def fetch_data(patient_id):
+    #brows
+    base_distances = views.get_ref_photo_landmarks(patient_id)
+
+
+
 
 def create_report(mouth_fig, eyebrows_fig, mouth_diff_prev, mouth_diff_first, eyebrows_diff_prev, eyebrows_diff_first, username):
     today = date.today()
