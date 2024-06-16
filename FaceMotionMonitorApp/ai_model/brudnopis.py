@@ -209,7 +209,7 @@ class VideoProcessor:
             frame_number_with_max_distance = get_max_distance_for_rec(all_frames_data)
 
         cap.release()
-        return all_frames_data, frame_number_with_max_distance
+        return all_frames_data, frame_number_with_max_distance, landmark_list
 
 
 
