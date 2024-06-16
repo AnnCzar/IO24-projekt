@@ -204,10 +204,31 @@ class PatientRegistration(views.APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+# class LoginView(APIView):
+#     def post(self, request):
+#         login_value = request.data.get('login')
+#         password = request.data.get('password')
+#
+#         auth_backend = AuthBackend()
+#         user = auth_backend.authenticate(request, login=login_value, password=password)
+#
+#         if user is not None:
+#             # Przekazanie nazwy backendu
+#             request.session['user_role'] = user.role
+#             request.session['user_id'] = user.id_id
+#             return Response('User logged in', status=status.HTTP_200_OK)
+#         else:
+#
+#             return Response('Nieprawidłowe dane logowania', status=400)
+
 class LoginView(APIView):
     def post(self, request):
+        print(request)
+
         login_value = request.data.get('login')
         password = request.data.get('password')
+        # print(login_value)
+        # print(password)
 
         auth_backend = AuthBackend()
         user = auth_backend.authenticate(request, login=login_value, password=password)
@@ -216,10 +237,11 @@ class LoginView(APIView):
             # Przekazanie nazwy backendu
             request.session['user_role'] = user.role
             request.session['user_id'] = user.id_id
-            return Response('User logged in', status=status.HTTP_200_OK)
+            return Response({'message': 'User logged in', 'role': user.role, 'user_id': user.id_id}, status=status.HTTP_200_OK)
         else:
 
             return Response('Nieprawidłowe dane logowania', status=400)
+
 
 
 class GetUserRoleView(View):

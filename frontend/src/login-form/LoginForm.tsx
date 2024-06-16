@@ -16,7 +16,7 @@ const LoginForm: React.FC = () => {
 
     const onSubmit = async (values: FormValues) => {
         try {
-            const response = await fetch('/login/', {
+            const response = await fetch('http://localhost:8000/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,8 +28,8 @@ const LoginForm: React.FC = () => {
                 try {
                     const data = await response.json();
                     const role = data.role;
-                    console.log('Login successful:', role); // Debugging
-                    if (role === 'DOCTOR') {
+                    console.log('Login successful:', role);
+                    if (role == 'doctor') {
                         window.location.href = "/patients";
                     } else {
                         window.location.href = "/examination";
@@ -39,7 +39,7 @@ const LoginForm: React.FC = () => {
                     setLoginError('An error occurred while logging in.');
                 }
             } else {
-                const errorText = await response.text(); // Odczytanie odpowiedzi jako tekstu
+                const errorText = await response.text();
                 console.error('Login failed:', errorText);
                 if (errorText.includes('Invalid login credentials')) {
                     setLoginError('Invalid login credentials. Please try again.');
