@@ -18,9 +18,16 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 
+<<<<<<< HEAD
 from IO_git.FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
     video_stream, start_video_processing, AddRecordingView, AddFrameView, AddFrameLandmarksView, CapturePhotoView, \
     delete_user, GetUserRoleView
+=======
+from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
+    video_stream, start_video_processing, CapturePhotoView, \
+    delete_user, GetUserRoleView, get_patients_by_doctor, get_reports_for_doctor_view, patient_details_view, \
+    get_reports_for_patient_view, LogoutView
+>>>>>>> e28b81569f2d485c7b30012fde31a1400cf26645
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,12 +39,22 @@ urlpatterns = [
     path('start-video-processing/', start_video_processing, name='start_video_processing'),
     path('capture-photo/', CapturePhotoView.as_view(), name='capture_photo'),  # capture the photo
     path('delete-user/<int:user_id>/', delete_user, name='delete_user'),
+    path('patients/by-doctor/', get_patients_by_doctor, name='get_patients_by_doctor'),
+    path('reports/doctor/<int:patient_id>/', get_reports_for_doctor_view, name='get_reports_for_doctor'),
+    path('patient/details/', patient_details_view, name='patient_details'),
+    path('reports/patient/', get_reports_for_patient_view, name='get_reports_for_patient'),
+
+
+
+    path('logout/', LogoutView.as_view(), name='logout'),
+
+
 
 
     # paths for testing in the postman, later there will be one path ----------------
-    path('addRecording/', AddRecordingView.as_view(), name='add_recording'),
-    path('addFrame/', AddFrameView.as_view(), name='add_frame'),
-    path('addLandmarks/', AddFrameLandmarksView.as_view(), name='add_landmarks'),
+    # path('addRecording/', AddRecordingView.as_view(), name='add_recording'),
+    # path('addFrame/', AddFrameView.as_view(), name='add_frame'),
+    # path('addLandmarks/', AddFrameLandmarksView.as_view(), name='add_landmarks'),
     path('get-user-role/', GetUserRoleView.as_view(), name='get_user_role'),
 
     # -------------------------------------

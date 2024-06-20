@@ -72,7 +72,12 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'user_id']
 
+class PatientSerializer1(serializers.ModelSerializer):
+    user_profile = UserProfileSerializer(source='user_id', read_only=True)
 
+    class Meta:
+        model = Patient
+        fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'user_profile']
 class DoctorAndPatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorAndPatient
@@ -144,3 +149,8 @@ class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reports
         fields = ['id', 'date', 'difference_mouth', 'difference_face', 'patient_id']
+
+class ReportsSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Reports
+        fields = ['id', 'date', 'difference_mouth', 'difference_2']

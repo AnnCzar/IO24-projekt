@@ -1,55 +1,77 @@
 .login_form {
-  padding: 0.1rem;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(8rem);
 }
 
-.login_form input[type="text"],
-.login_form input[type="password"] {
-  font-size: 1rem;
+.login_text {
+  margin-bottom: 2vh; /* Use vh for consistent spacing */
 }
 
-.login_text{
-    margin-bottom: 1rem;
-}
-
-.login button {
+.login_form button {
   font-size: 1.2rem;
-  margin-top: 10rem;
-  margin-bottom: 1rem;
-}
-
-.register button {
-  font-size: 10rem;
-  margin-top: 10rem;
-  margin-bottom: 1rem;
+  margin-top: 2vh; /* Use vh for consistent spacing */
 }
 
 .background_login {
   background-image: url('../images/background.svg');
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center center;
-  height: 100vh;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .header_login {
   color: white;
-  transform: translateY(4rem);
   font-style: revert;
-  font-size: 4.375rem;
+  font-size: 4vh;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 20vh;
+  margin-top: 10vh;
 }
+
+/*.logo_bottom {*/
+/*  margin-top: 4vh;*/
+/*  width: 20vw;*/
+/*  height: auto;*/
+/*}*/
+
+.login_container {
+  padding: 4vh 2vw; /* Use vh and vw for padding */
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90vw; /* Use vw for responsive width */
+  max-width: 400px;
+
+}
+
+@media (max-width: 600px) {
+  .header_login {
+    font-size: 3vh; /* Adjust for smaller screens */
+  }
+
+  .login_form button {
+    font-size: 1rem;
+  }
 .logo_bottom {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(70%);
-  width: 70em;
+  margin-top: 4vh;
+  width: 30vw;
   height: auto;
+  align-items: center;
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  .logo_bottom {
+    width: 50vw;
+  }
+}
 }

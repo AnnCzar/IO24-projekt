@@ -85,9 +85,27 @@ class VideoProcessor:
         distances = {}
         for landmark in landmark_points:
             landmark_index, x_landmark, y_landmark = landmark
-            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2)
+            distance = math.sqrt((x_landmark - x_center) ** 2 + (y_landmark - y_center) ** 2) /k
             distances[landmark_index] = distance
         return distances
+
+    def calculate_distance_mouth(self, landmark_points):
+        # 61 - left mouth corner
+        # 291 - right mouth corner
+        width = self.iris_width(landmark_points)
+        k = width / 11 #scale
+        x = []
+        y = []
+        for landmark in landmark_points:
+            landmark_index, x_landmark, y_landmark = landmark
+            if landmark_index == 61 or landmark_index == 291:
+                x.append(x_landmark)
+                y.append(y_landmark)
+        distance = math.sqrt((x[0] - x[1]) ** 2 + (y[0] - y[1]) ** 2) /k
+        return distance
+
+
+
 
     # def process_frame(self):
     #     ret, img = self.cap.read()
@@ -130,6 +148,7 @@ class VideoProcessor:
     def process_video(self, video_data):  # new version
 
         # Convert the video data to a numpy array and then decode it
+        global frame_number_with_max_distance
         video_array = np.frombuffer(video_data, np.uint8)
         cap = cv2.VideoCapture(cv2.CAP_FFMPEG, video_array)
 
@@ -187,9 +206,10 @@ class VideoProcessor:
 
                     print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
             all_frames_data[frame_count] = frame_data
+            frame_number_with_max_distance = get_max_distance_for_rec(all_frames_data)
 
         cap.release()
-        return all_frames_data
+        return all_frames_data, frame_number_with_max_distance, landmark_list
 
 
 
@@ -284,6 +304,20 @@ class VideoProcessor:
         cv2.destroyAllWindows()
 
 
+
+def get_max_distance_for_rec(frame_data_list):
+    landmark_index = [61, 291]
+    max_distance = -1
+    frame_number_with_max_distance = None
+
+    for frame_number, frame_data in frame_data_list:
+        if landmark_index in frame_data['landmarks']:
+            distance = frame_data['landmarks'][landmark_index]
+            if distance > max_distance:
+                max_distance = distance
+                frame_number_with_max_distance = frame_number
+
+    return frame_number_with_max_distance
 if __name__ == "__main__":
     processor = VideoProcessor()
     processor.display_video()

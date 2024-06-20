@@ -14,12 +14,12 @@
     "@types/node": "^16.18.97",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
+    "axios": "^1.7.2",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "formik": "^2.4.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.23.0",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "react-webcam": "^7.2.0",
@@ -53,6 +53,10 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "styled-components": "^6.1.11"
+  },
+  "env": {
+    "REACT_APP_API_URL": "http://localhost:8000/"
   }
 }

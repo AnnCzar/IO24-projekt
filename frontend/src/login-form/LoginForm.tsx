@@ -1,135 +1,144 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React from "react";
 import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { Link } from 'react-router-dom';
-import RoleChoice from "../role-choice/RoleChoice";
 import "./LoginForm.css";
 import logo from "../images/Logo1.svg";
+import { useNavigate } from 'react-router-dom';
 
 interface FormValues {
-  username: string;
-  password: string;
+    username: string;
+    password: string;
 }
 
+const LoginForm: React.FC = () => {
+    const [loginError, setLoginError] = React.useState<string>("");
+    const navigate = useNavigate();
+    const onSubmit = async (values: FormValues) => {
+        try {
+            const response = await fetch('http://localhost:8000/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ login: values.username, password: values.password }),
+            });
 
-function LoginForm() {
-  const [showRoleChoice, setShowRoleChoice] = useState(false);
-  const [role, setRole] = useState(""); // Stan przechowujący rolę użytkownika
+            if (response.ok) {
+                try {
+                    const data = await response.json();
+                    const role = data.role;
+                    console.log('Login successful:', role);
+                    if (role == 'doctor') {
 
-  const handleSubmit = async (values: FormValues, setRole: Function, e: any) => {
-  e.preventDefault();
+                         navigate('/patients');
+                    } else {
+                        navigate('/examination');
+                    }
+                } catch (error) {
+                    console.error('Failed to parse JSON:', error);
+                    setLoginError('An error occurred while logging in.');
+                }
+            } else {
+                const errorText = await response.text();
+                console.error('Login failed:', errorText);
+                if (errorText.includes('Invalid login credentials')) {
+                    setLoginError('Invalid login credentials. Please try again.');
+                } else {
+                    setLoginError('An error occurred while logging in.');
+                }
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+            setLoginError('An error occurred while logging in.');
+        }
+    };
 
-  const { username, password } = values;
+    const validationSchema = yup.object().shape({
+        username: yup.string().required("Username is required"),
+        password: yup.string().required("Password is required")
+                    .min(6, "Password must be at least 6 characters long"),
+    });
 
-  try {
-    const response = await fetch(`/get-user-role/?login=${username}`);
-    if (response.ok) {
-      const data = await response.json();
-      const userRole = data.role;
-      setRole(userRole); // Ustawienie roli użytkownika w stanie komponentu
-    } else {
-      console.error('Failed to fetch user role');
-    }
-  } catch (error) {
-    console.error('Error while fetching role:', error);
-    alert('Login failed.');
-  }
-};
+    return (
+        <div className="background_login">
+            <div className="login_container">
+                <header className="header_login">SIGN IN</header>
 
-  const onSubmit = useCallback(async (values: FormValues, formik: any) => {
-    await handleSubmit(values, setRole, null); // Przekazanie funkcji setRole jako argument
-  }, []);
-
-  const validationSchema = useMemo(
-    () =>
-      yup.object().shape({
-        username: yup.string().required("This field can't be empty"),
-        password: yup
-          .string()
-          .required("This field can't be empty")
-          .min(5, "Password has to be at least 5 characters long"),
-      }),
-    []
-  );
-
-  return (
-    <div className="background_login">
-      {showRoleChoice ? (
-        <RoleChoice />
-      ) : (
-        <div>
-          <header className="header_login">SIGN IN</header>
-
-          <Formik
-            initialValues={{ username: "", password: "" }}
-            onSubmit={onSubmit}
-            validationSchema={validationSchema}
-            validateOnChange
-            validateOnBlur
-          >
-            {(formik) => (
-              <form
-                className="login_form"
-                id="signForm"
-                noValidate
-                onSubmit={formik.handleSubmit}
-              >
-                <TextField
-                  id="username"
-                  name="username"
-                  className="login_text"
-                  label="Login"
-                  variant="standard"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.username && !!formik.errors.username}
-                  helperText={
-                    formik.touched.username && formik.errors.username
-                  }
-                  InputLabelProps={{ style: { fontSize: "25px" } }}
-                />
-                <TextField
-                  id="password"
-                  name="password"
-                  label="Password"
-                  variant="standard"
-                  type="password"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.password && !!formik.errors.password}
-                  helperText={
-                    formik.touched.password && formik.errors.password
-                  }
-                  InputLabelProps={{ style: { fontSize: "25px" } }}
-                />
-
-                <Button
-                  variant="contained"
-                  type="submit"
-                  disabled={!(formik.isValid && formik.dirty)}
-                  component={Link}
-                  to={role === 'DOCTOR' ? "/patients" : "/examination"}
+                <Formik
+                    initialValues={{ username: "", password: "" }}
+                    onSubmit={onSubmit}
+                    validationSchema={validationSchema}
+                    validateOnChange
+                    validateOnBlur
                 >
-                  SIGN IN
-                </Button>
+                    {(formik) => (
+                        <form
+                            className="login_form"
+                            id="signForm"
+                            noValidate
+                            onSubmit={formik.handleSubmit}
+                        >
+                            <TextField
+                                id="username"
+                                name="username"
+                                className="login_text"
+                                label="Login"
+                                variant="standard"
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={formik.touched.username && !!formik.errors.username}
+                                helperText={formik.touched.username && formik.errors.username}
+                                InputLabelProps={{ style: { fontSize: "1.5rem" } }}
+                                fullWidth
+                            />
+                            <TextField
+                                id="password"
+                                name="password"
+                                label="Password"
+                                variant="standard"
+                                type="password"
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                                error={formik.touched.password && !!formik.errors.password}
+                                helperText={formik.touched.password && formik.errors.password}
+                                InputLabelProps={{ style: { fontSize: "1.5rem" } }}
+                                fullWidth
+                            />
 
-                <Button
-                  variant="outlined"
-                  component={Link}
-                  to="/role-choice"
-                >
-                  Register
-                </Button>
-              </form>
-            )}
-          </Formik>
+                            <Button
+                                variant="contained"
+                                type="submit"
+                                disabled={!(formik.isValid && formik.dirty)}
+                                fullWidth
+                                style={{ marginTop: '1rem' }}
+                            >
+                                SIGN IN
+                            </Button>
 
-          <img src={logo} alt="Logo" className="logo_bottom" />
+                            <Button
+                                variant="outlined"
+                                component={Link}
+                                to="/role-choice"
+                                fullWidth
+                                style={{ marginTop: '1rem' }}
+                            >
+                                Register
+                            </Button>
+
+                            {loginError && (
+                                <div className="login_error">{loginError}</div>
+                            )}
+                        </form>
+                    )}
+                </Formik>
+
+                <img src={logo} alt="Logo" className="logo_bottom" />
+            </div>
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default LoginForm;
