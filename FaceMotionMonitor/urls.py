@@ -21,7 +21,7 @@ from django.views.generic import TemplateView
 from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
     video_stream, start_video_processing, CapturePhotoView, \
     delete_user, GetUserRoleView, get_patients_by_doctor, get_reports_for_doctor_view, patient_details_view, \
-    get_reports_for_patient_view, LogoutView
+    get_reports_for_patient_view, LogoutView, delete_patient, get_all_patients
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,7 +37,8 @@ urlpatterns = [
     path('reports/doctor/<int:patient_id>/', get_reports_for_doctor_view, name='get_reports_for_doctor'),
     path('patient/details/', patient_details_view, name='patient_details'),
     path('reports/patient/', get_reports_for_patient_view, name='get_reports_for_patient'),
-
+    path('delete_patient/<int:patient_id>/', delete_patient, name='delete_patient'),
+    path('patients/', get_all_patients, name='get_all_patients'),
 
 
     path('logout/', LogoutView.as_view(), name='logout'),

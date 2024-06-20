@@ -14,8 +14,9 @@ import './Patients.css';
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 
+
 interface Column {
-  id: 'patients_id' | 'sex' | 'date_of_birth' | 'pesel' | 'date_of_diagnosis';
+  id: keyof Data;
   label: string;
   minWidth?: number;
   align?: 'center';
@@ -23,7 +24,7 @@ interface Column {
 }
 
 interface Data {
-  patients_id: number;
+  id: number;
   sex: string;
   date_of_birth: string;
   pesel: number;
@@ -31,7 +32,7 @@ interface Data {
 }
 
 const columns: readonly Column[] = [
-  { id: 'patients_id', label: 'Patients ID', minWidth: 170 },
+  { id: 'id', label: 'Patients ID', minWidth: 170 },
   { id: 'sex', label: 'Sex', minWidth: 100, align: "center" },
   {
     id: 'date_of_birth',
@@ -120,6 +121,10 @@ const Patients: React.FC = () => {
     navigate('/addpatient');
   }, [navigate]);
 
+  const handleRowClick = (patientId: number) => {
+    window.open(`/reports?patientId=${patientId}`, '_blank'); // Open the Reports component in a new tab
+  };
+
   return (
     <div className="background_patients">
       <header className="header_patients">PATIENTS</header>
@@ -128,7 +133,7 @@ const Patients: React.FC = () => {
         <LogoutIcon />
         <span>Log out</span>
       </button>
-      <button className="new_patient" onClick={() => navigate('/addpatient')}>
+      <button className="new_patient" onClick={handleAddPatientClick}>
         <AddPatient className="icon" />
         <span>Add patient</span>
       </button>
@@ -147,7 +152,7 @@ const Patients: React.FC = () => {
               </TableHead>
               <TableBody>
                 {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                  <TableRow hover tabIndex={-1} key={row.patients_id}>
+                  <TableRow hover tabIndex={-1} key={row.id} onClick={() => handleRowClick(row.id)}>
                     {columns.map((column) => (
                       <TableCell key={column.id} align={column.align}>
                         {column.format && typeof row[column.id] === 'string' ? column.format(row[column.id]) : row[column.id]}
@@ -174,3 +179,5 @@ const Patients: React.FC = () => {
 };
 
 export default Patients;
+
+

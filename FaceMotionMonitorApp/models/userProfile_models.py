@@ -25,7 +25,7 @@ class Doctor(models.Model):
 class Patient(models.Model):
     id = models.AutoField(primary_key=True)
     date_of_birth = models.DateField()
-    date_of_diagnosis = models.DateField()
+    date_of_diagnosis = models.DateField(null =True)
     sex = models.CharField(max_length=10, choices=[(sex.value, sex.name) for sex in Sex])
     user_id = models.OneToOneField(UserProfile, on_delete=models.CASCADE)
 

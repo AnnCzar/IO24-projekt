@@ -154,3 +154,30 @@ class ReportsSerializer1(serializers.ModelSerializer):
     class Meta:
         model = Reports
         fields = ['id', 'date', 'difference_mouth', 'difference_2']
+
+
+
+
+class PatientSerializer1(serializers.ModelSerializer):
+    pesel = serializers.CharField(source='user_id.pesel')  # Access pesel from related UserProfile
+
+    class Meta:
+        model = Patient
+        fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'pesel']  # Include pesel in the fields
+
+class PatientsSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='user_id.name')
+    surname = serializers.CharField(source='user_id.surname')
+    email = serializers.CharField(source='user_id.email')
+    date_of_last_exam = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Patient
+        fields = ['id', 'name', 'surname', 'sex', 'email', 'date_of_last_exam']  # Include pesel in the fields
+    def get_date_of_last_exam(self, obj):
+        # Pobieramy najnowszy raport dla danego pacjenta
+        latest_report = Reports.objects.filter(patient_id=obj.user_id).order_by('-date').first()
+        if latest_report:
+            return latest_report.date
+        return None
+

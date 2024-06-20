@@ -425,7 +425,7 @@ def calculate_difference(landmark_list, patient_id):
     return mouth, eyebrow_diff
 
 
-@api_view(['DELETE'])
+@api_view(['DELETE'])    # not used
 def delete_user(request, user_id):
     try:
         # Usunięcie danych z tabeli Auth
@@ -456,6 +456,47 @@ def delete_user(request, user_id):
     except Exception as e:
         # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
         return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
+
+
+
+@api_view(['DELETE'])    # for admin
+def delete_patient(request, patient_id):
+    try:
+        # Fetch the patient record
+        patient = Patient.objects.filter(id=patient_id).first()
+        if patient:
+            # Get the user_id related to the patient
+            user_id = patient.user_id_id
+
+            # Delete data from the Auth table
+            Auth.objects.filter(id=user_id).delete()
+
+            # Delete the patient record
+            patient.delete()
+
+            # Delete the assignment from the DoctorAndPatient table
+            DoctorAndPatient.objects.filter(patient_id=patient_id).delete()
+
+            # Delete the related UserProfile record
+            UserProfile.objects.filter(id=user_id).delete()
+
+            # Check if the user is also a doctor and delete if exists
+            # doctor = Doctor.objects.filter(user_id=user_id).first()
+            # if doctor:
+            #     doctor_id = doctor.id
+            #     doctor.delete()
+            #     # Delete the assignment from the DoctorAndPatient table
+            #     DoctorAndPatient.objects.filter(doctor_id=doctor_id).delete()
+
+            # Return HTTP response
+            return Response({'message': 'Patient deleted successfully'}, status=200)
+
+        else:
+            return Response({'error': 'Patient not found'}, status=404)
+
+    except Exception as e:
+        # Handle exception (e.g., database issue)
+        return Response({'error': 'Failed to delete patient', 'details': str(e)}, status=500)
 
 # def get_ref_photo_landmarks(patient_id):
 #     ref_photo = RefPhotos.objects.get(user_id=patient_id)
@@ -491,7 +532,7 @@ def get_patients_by_doctor(request):
         patients = Patient.objects.filter(id__in=patient_ids).select_related('user_id')
 
         # Serialize the patient data
-        serializer = PatientSerializer(patients, many=True)
+        serializer = PatientSerializer1(patients, many=True)
 
         return Response(serializer.data)
     except Exception as e:
@@ -519,7 +560,7 @@ def get_reports_for_doctor_view(request, patient_id):
             reports = Reports.objects.filter(patient_id=patient_id)
 
             serializer = ReportsSerializer(reports, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     except Reports.DoesNotExist:
@@ -554,7 +595,7 @@ def get_reports_for_patient_view(request):
         reports = Reports.objects.filter(patient_id=patient_id)
 
         serializer = ReportsSerializer(reports, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     except Reports.DoesNotExist:
@@ -573,3 +614,19 @@ class LogoutView(APIView):
             return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET'])
+def get_all_patients(request):
+    try:
+
+        patients = Patient.objects.all()
+    except Patient.DoesNotExist:
+        return Response({'error': 'No patient found'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = PatientsSerializer(patients, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+

@@ -34,8 +34,11 @@ const LoginForm: React.FC = () => {
                     if (role == 'doctor') {
 
                          navigate('/patients');
-                    } else {
+                    } else if (role == 'patient'){
                         navigate('/examination');
+                    }
+                    else if ((role == 'admin')){
+                        navigate('/allpatients');
                     }
                 } catch (error) {
                     console.error('Failed to parse JSON:', error);
