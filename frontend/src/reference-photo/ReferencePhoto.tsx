@@ -2,11 +2,11 @@ import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@mui/material";
 import "./ReferencePhoto.css";
-import Examination from "../examination/Examination";
+import {useNavigate} from "react-router-dom";
 
 function ReferencePhoto() {
+  const navigate = useNavigate();
   const webRef = useRef<any>(null);
-  const [redirect, setRedirect] = useState<boolean>(false);
   const [photoTaken, setPhotoTaken] = useState<boolean>(false);
 
   const showImage = async () => {
@@ -18,11 +18,7 @@ function ReferencePhoto() {
   };
 
   const handleConfirmClick = () => {
-    setRedirect(true);
-  };
-
-  if (redirect) {
-    return <Examination />;
+    navigate('/examination');
   }
 
   return (
@@ -33,7 +29,7 @@ function ReferencePhoto() {
           <Webcam ref={webRef} />
         </div>
         <button onClick={showImage}>Picture</button>
-        <Button variant="contained" type="submit" onClick={handleConfirmClick} disabled={!photoTaken}>
+        <Button variant="contained" type="submit" className="signin_reference_photo" onClick={handleConfirmClick} disabled={!photoTaken}>
           SIGN IN
         </Button>
       </div>

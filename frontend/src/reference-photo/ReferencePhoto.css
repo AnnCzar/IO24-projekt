@@ -1,10 +1,10 @@
 .reference-photo {
-  padding: 0.1rem; /* 5rem */
+  padding: 0.1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(1rem); /* 300px / 16px = 18.75rem */
+  transform: translateY(1rem);
 }
 
 .background_photo {
@@ -12,18 +12,13 @@
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
-  height: calc(90vh - 4rem); /* 60px / 16px = 3.75rem */
-}
-
-.reference-photo button {
-  font-size: 1.5rem; /* 2rem */
-  margin-top: 1rem; /* 2rem */
+  height: calc(90vh - 4rem);
 }
 
 .webcam-container {
   width: 100vw;
   height: 55vh;
-  max-width: 100rem; /* 800px / 16px = 50rem */
+  max-width: 100rem;
 }
 
 .webcam-container video {
@@ -33,16 +28,16 @@
 
 .header_photo {
   color: white;
-  transform: translateY(2rem); /* 150px / 16px = 9.375rem */
+  transform: translateY(2rem);
   font-style: revert;
-  font-size: 4.375rem; /* 70px / 16px = 4.375rem */
+  font-size: 4.375rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1.25rem; /* 20px / 16px = 1.25rem */
+  margin-bottom: 1.25rem;
 }
 
-.sign in button {
-  font-size: 1.2rem; /* 25px / 16px = 1.563rem */
-  margin-top: 1.875rem; /* 30px / 16px = 1.875rem */
-  margin-bottom: 1.25rem; /* 20px / 16px = 1.25rem */
+.reference-photo button {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0rem;
 }

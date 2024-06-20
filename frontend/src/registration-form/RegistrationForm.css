@@ -1,16 +1,16 @@
 .registration-form {
-  padding: 0.1rem; /* 5rem */
+  padding: 0.1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(4rem); /* 300px / 16px = 18.75rem */
+  transform: translateY(4rem);
 }
 
 .registration-form button {
-  font-size: 1.2rem; /* 25px / 16px = 1.563rem */
-  margin-top: 1.875rem; /* 30px / 16px = 1.875rem */
-  margin-bottom: 1.25rem; /* 20px / 16px = 1.25rem */
+  font-size: 1.2rem;
+  margin-top: 1.875rem;
+  margin-bottom: 1.25rem;
 }
 
 .background_register {
@@ -18,15 +18,15 @@
   background-size: 100vw auto;
   background-repeat: no-repeat;
   background-position: center;
-  height: calc(100vh - 3.75rem); /* 60px / 16px = 3.75rem */
+  height: calc(100vh - 3.75rem);
 }
 
 .header_register {
   color: white;
-  transform: translateY(4rem); /* 190px / 16px = 11.875rem */
+  transform: translateY(4rem);
   font-style: revert;
-  font-size: 4rem; /* 70px / 16px = 4.375rem */
+  font-size: 4rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1.25rem; /* 20px / 16px = 1.25rem */
+  margin-bottom: 1.25rem;
 }

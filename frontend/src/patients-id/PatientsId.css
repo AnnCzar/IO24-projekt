@@ -1,0 +1,63 @@
+.patients_id {
+  padding: 0.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(6rem);
+}
+
+.background_id {
+  background-image: url('../images/background.svg');
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 3.75rem);
+}
+
+.header_id {
+  color: white;
+  transform: translateY(2.5rem);
+  font-style: revert;
+  font-size: 4.375rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.goback_id {
+  position: fixed;
+  top: 1.25rem;
+  flex-direction: column;
+  left: 1.25rem;
+  z-index: 9999;
+  width: 7.5rem;
+  height: 7.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  fill: black;
+}
+
+.goback_id svg {
+  width: 3.125rem;
+  height: 3.125rem;
+  fill: currentColor;
+}
+
+.goback_id span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
+}
+
+.goback_id:hover {
+  background-color: #f0f0f0;
+}
+
+.patients_id button{
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}

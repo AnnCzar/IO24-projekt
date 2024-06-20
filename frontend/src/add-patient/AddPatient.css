@@ -1,0 +1,64 @@
+.add_patient {
+  padding: 0.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(5rem);
+}
+
+.background_add_patient {
+  background-image: url('../images/background.svg');
+  background-size: 100vw auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 3.75rem);
+}
+
+.header_add_patient {
+  color: white;
+  transform: translateY(3rem);
+  font-style: revert;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.add_patient button{
+  font-size: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 10rem;
+}
+
+.goback_add_patient {
+  position: fixed;
+  top: 1.25rem;
+  flex-direction: column;
+  left: 1.25rem;
+  z-index: 9999;
+  width: 6rem;
+  height: 6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  fill: black;
+}
+
+.goback_add_patient svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  fill: currentColor;
+}
+
+.goback_add_patient span {
+  margin-top: 0.3125rem;
+  font-size: 1.25rem;
+}
+
+.go-back_add_patient:hover {
+  background-color: #f0f0f0;
+}

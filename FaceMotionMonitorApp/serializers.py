@@ -4,7 +4,7 @@ from django.apps import apps
 from django.contrib.auth.hashers import make_password
 from FaceMotionMonitorApp.models import UserProfile
 from FaceMotionMonitorApp.models.userProfile_models import Auth, Doctor, Patient, DoctorAndPatient, Recordings, Frames, \
-    FrameLandmarks, RefPhotos, RefPhotoLandmarks, Smile
+    FrameLandmarks, RefPhotos, RefPhotoLandmarks, Reports
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -109,43 +109,17 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-
-
-class SmileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Smile
-        fields = ['id', 'left_corner_photo', 'right_corner_photo', 'left_corner', 'right_corner', 'frame_id']
-
-
-
 class FramesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Frames
         fields = ['id', 'frame_number', 'timestamp', 'x_center', 'y_center', 'recording_id']
-    # framelandmarks = FrameLandmarksSerializer(many=True)
-    # smile = SmileSerializer()
-    #
-    # class Meta:
-    #     model = Frames
-    #     fields = '__all__'
-    #
-    # def create(self, validated_data):
-    #     landmarks_data = validated_data.pop('framelandmarks')
-    #     smile_data = validated_data.pop('smile')
-    #     frame = Frames.objects.create(**validated_data)
-    #
-    #     for landmark_data in landmarks_data:
-    #         FrameLandmarks.objects.create(frame=frame, **landmark_data)
-    #
-    #     Smile.objects.create(frame=frame, **smile_data)
-    #
-    #     return frame
+
 
 class FrameLandmarksSerializer(serializers.ModelSerializer):
     class Meta:
         model = FrameLandmarks
-        fields = ['id', 'x_cord', 'y_cord', 'landmark_number', 'frame_id']
+        fields = ['id', 'landmark_number', 'distance', 'frame_id']
 
 class RecordingsSerializer(serializers.ModelSerializer):
 
@@ -153,27 +127,7 @@ class RecordingsSerializer(serializers.ModelSerializer):
         model = Recordings
         fields = ['id', 'date', 'time', 'patient_id']
 
-    # frames = FramesSerializer(many=True)
-    #
-    # class Meta:
-    #     model = Recordings
-    #     fields = '__all__'
-    #
-    # def create(self, validated_data):
-    #     frames_data = validated_data.pop('frames')
-    #     recording = Recordings.objects.create(**validated_data)
-    #
-    #     for frame_data in frames_data:
-    #         landmarks_data = frame_data.pop('framelandmarks')
-    #         smile_data = frame_data.pop('smile')
-    #         frame = Frames.objects.create(recording=recording, **frame_data)
-    #
-    #         for landmark_data in landmarks_data:
-    #             FrameLandmarks.objects.create(frame=frame, **landmark_data)
-    #
-    #         Smile.objects.create(frame=frame, **smile_data)
-    #
-    #     return recording
+
 class RefPhotosSerializer(serializers.ModelSerializer):
     class Meta:
         model = RefPhotos
@@ -183,6 +137,10 @@ class RefPhotosSerializer(serializers.ModelSerializer):
 class RefPhotoLandmarksSerializer(serializers.ModelSerializer):
     class Meta:
         model = RefPhotoLandmarks
-        fields = ['id', 'x_cord', 'y_cord', 'landmark_number', 'ref_photo']
+        fields = ['id', 'landmark_number', 'distance', 'ref_photo']
 
 
+class ReportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reports
+        fields = ['id', 'date', 'difference_mouth', 'difference_face', 'patient_id']
