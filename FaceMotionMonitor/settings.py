@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 SESSION_COOKIE_AGE = 86400  # 1 day in seconds

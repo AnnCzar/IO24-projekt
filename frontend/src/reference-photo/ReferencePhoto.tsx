@@ -5,29 +5,30 @@ import { useNavigate } from "react-router-dom";
 import "./ReferencePhoto.css";
 
 function ReferencePhoto() {
+
   const navigate = useNavigate();
   const webRef = useRef<Webcam>(null);
   const [photoTaken, setPhotoTaken] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const showImage = useCallback(() => {
+   const handleConfirmClick = () => {
+    navigate('/examination');
+  }
+
+  const showImage = useCallback(async () => {
     if (webRef.current) {
       const screenshot = webRef.current.getScreenshot();
       setImage(screenshot);
       setPhotoTaken(true);
-    }
-  }, [webRef]);
 
-  const handleConfirmClick = useCallback(async () => {
-    if (image) {
       try {
-        const response = await fetch('http://localhost:8000/capture_photo/', {
+        const response = await fetch('http://localhost:8000/capture-photo/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ image }),
+          body: JSON.stringify({ image: screenshot }),
         });
 
         if (response.status === 201) {
@@ -39,7 +40,7 @@ function ReferencePhoto() {
         setErrorMessage("An error occurred. Please try again.");
       }
     }
-  }, [image, navigate]);
+  }, [webRef, navigate]);
 
   return (
     <div className="background_photo">
