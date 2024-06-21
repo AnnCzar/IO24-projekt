@@ -281,48 +281,52 @@ def generate_frames():
 #
 
 
-@api_view(['POST'])
-def capture_photo(request):
-    data = request.data
-    image_data = data['image']
-    image_data = base64.b64decode(image_data.split(',')[1])
-    np_arr = np.frombuffer(image_data, np.uint8)
-    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+class CapturePhotoView(APIView):
+    def post(self, request):
+        data = request.data
+        image_data = data['image']
+        image_data = base64.b64decode(image_data.split(',')[1])
+        np_arr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-    date_now = date.today()
-    patient_id = 1  # example - change when session will be connect
+        date_now = date.today()
+        patient_id = 1  # example - change when session will be connect
 
-    processor = VideoProcessor()
-    img, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo(img)
+        processor = VideoProcessor()
+        _, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo()
 
-    ref_photo_data = {
-        'date': date_now,
-        'x_center': x_center,
-        'y_center': y_center,
-        'patient_id': patient_id
-    }
+        ref_photo_data = {
+            'date': date_now,
+            'x_center': x_center,
+            'y_center': y_center,
+            'patient_id': patient_id
+        }
+        # addRefPhotoView(ref_photo_data)   # it's not working, because i cant get photo id
+        ref_photos_serializer = RefPhotosSerializer(data=ref_photo_data)
 
-    ref_photos_serializer = RefPhotosSerializer(data=ref_photo_data)
-
-    if ref_photos_serializer.is_valid():
-        ref_photos_serializer.save()
-
-        for landmark, distance in distances.items():
+        for landmark, distnace in distances.items():
             ref_photo_landmarks_data = {
-                'x_cord': distance,
+                'x_cord': distnace,  # zmienic tabele
                 'y_cord': 0,
                 'landmark_number': landmark,
                 'ref_photo': ref_photos_serializer.data['id']
             }
-            ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(data=ref_photo_landmarks_data)
+            ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(ref_photo_landmarks_data)
             if ref_photos_landmarks_serializer.is_valid():
                 ref_photos_landmarks_serializer.save()
+                return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return JsonResponse(ref_photos_landmarks_serializer.errors, status=400)
+                return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return JsonResponse(ref_photos_serializer.data, status=201)
-    else:
-        return JsonResponse(ref_photos_serializer.errors, status=400)
+        if ref_photos_serializer.is_valid():
+            ref_photos_serializer.save()
+            return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if img_bytes is None:  # to nwm czy nie wywalic
+            return HttpResponse("Failed to capture photo.", status=500)
+
 
 @api_view(['GET'])  # streams the video frames to the client
 def video_stream(request):
@@ -422,7 +426,7 @@ def calculate_difference(landmark_list, patient_id):
     return mouth, eyebrow_diff
 
 
-@api_view(['DELETE'])
+@api_view(['DELETE'])    # not used
 def delete_user(request, user_id):
     try:
         # Usunięcie danych z tabeli Auth
@@ -453,6 +457,7 @@ def delete_user(request, user_id):
     except Exception as e:
         # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
         return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
+
 
 
 @api_view(['DELETE'])    # for admin
@@ -528,7 +533,7 @@ def get_patients_by_doctor(request):
         patients = Patient.objects.filter(id__in=patient_ids).select_related('user_id')
 
         # Serialize the patient data
-        serializer = PatientSerializer(patients, many=True)
+        serializer = PatientSerializer1(patients, many=True)
 
         return Response(serializer.data)
     except Exception as e:
@@ -556,7 +561,7 @@ def get_reports_for_doctor_view(request, patient_id):
             reports = Reports.objects.filter(patient_id=patient_id)
 
             serializer = ReportsSerializer(reports, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     except Reports.DoesNotExist:
@@ -591,7 +596,7 @@ def get_reports_for_patient_view(request):
         reports = Reports.objects.filter(patient_id=patient_id)
 
         serializer = ReportsSerializer(reports, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     except Reports.DoesNotExist:
@@ -610,6 +615,8 @@ class LogoutView(APIView):
             return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 @api_view(['GET'])
 def get_all_patients(request):

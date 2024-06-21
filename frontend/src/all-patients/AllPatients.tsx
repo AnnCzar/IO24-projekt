@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -15,7 +15,7 @@ import { ReactComponent as DeletePatient } from "../images/delete.svg";
 import './AllPatients.css';
 
 interface Column {
-  id: 'patients_id' | 'name' | 'sex' | 'email' | 'date_of_last_exam';
+  id: 'id' | 'name' | 'surname' | 'sex' | 'email' | 'date_of_last_exam';
   label: string;
   minWidth?: number;
   align?: 'center';
@@ -23,8 +23,9 @@ interface Column {
 }
 
 const columns: readonly Column[] = [
-  { id: 'patients_id', label: 'Patients ID', minWidth: 170 },
+  { id: 'id', label: 'Patients ID', minWidth: 170 },
   { id: 'name', label: 'Name', minWidth: 100, align: 'center' },
+  { id: 'surname', label: 'Surname', minWidth: 100, align: 'center' },
   {
     id: 'sex',
     label: 'Sex',
@@ -44,28 +45,55 @@ const columns: readonly Column[] = [
     label: 'Date of the last examination',
     minWidth: 170,
     align: 'center',
-    format: (value: string) => new Date(value).toLocaleDateString('en-US'),
+    format: (value: string | null | undefined) => value ? new Date(value).toLocaleDateString('en-US') : '-',
   },
 ];
 
 interface Data {
-  patients_id: number;
+  id: number;
   name: string;
+  surname: string;
   sex: string;
   email: string;
   date_of_last_exam: string;
 }
 
-// Example rows data
-const rows: Data[] = [
-  { patients_id: 1, name: 'John Doe', sex: 'Male', email: 'john.doe@example.com', date_of_last_exam: '2023-05-15' },
-  { patients_id: 2, name: 'Jane Smith', sex: 'Female', email: 'jane.smith@example.com', date_of_last_exam: '2022-12-20' },
-];
-
 export default function AllPatients() {
   const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [patients, setPatients] = useState<Data[]>([]); // Użyj Data[] jako typu generycznego dla useState
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/patients/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch patients');
+      }
+      const data = await response.json();
+      const formattedPatients = data.map((patient: any) => ({
+        id: Number(patient.id), // Konwersja na number
+        name: patient.name,
+        surname: patient.surname,
+        sex: patient.sex,
+        email: patient.email,
+        date_of_last_exam: patient.date_of_last_exam,
+      }));
+      setPatients(formattedPatients);
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    }
+  };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -115,31 +143,27 @@ export default function AllPatients() {
               </TableHead>
 
               <TableBody>
-                {rows
+                {patients
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => {
-                    return (
-                      <TableRow hover role="checkbox" tabIndex={-1} key={row.patients_id}>
-                        {columns.map((column) => {
-                          const value = row[column.id as keyof Data];
-                          return (
-                            <TableCell key={column.id} align="center" className="no-bottom-border">
-                              {column.format && typeof value !== 'undefined'
-                                ? column.format(value)
-                                : value}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
+                  .map((patient) => (
+                    <TableRow key={patient.id} hover role="checkbox" tabIndex={-1}>
+                      {columns.map((column) => {
+                        const value = patient[column.id as keyof Data];
+                        return (
+                          <TableCell key={column.id} align={column.align} className="no-bottom-border">
+                            {column.format ? column.format(value) : value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
             rowsPerPageOptions={[10, 25, 100]}
             component="div"
-            count={rows.length}
+            count={patients.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
