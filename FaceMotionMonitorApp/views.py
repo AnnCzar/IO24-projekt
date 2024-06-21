@@ -24,13 +24,14 @@ from .ai_model import brudnopis
 
 class DoctorRegistration(views.APIView):
     def post(self, request):
-        role_vale = Role[request.data['role']].value
+        request.data['role'] = 'DOCTOR'
+        role_value = Role[request.data['role']].value
         pwz = request.data['pwz_pwzf']
         email = request.data['email']
         login1 = request.data['login']
         # checking if the user exists
 
-        if role_vale == Role.DOCTOR.value and not (
+        if role_value == Role.DOCTOR.value and not (
                 validate_email(email) and validate_login(login1) and validate_pwz_pwzf(pwz)):
 
             user_profile_serializer = UserProfileSerializer(data=request.data)
@@ -40,7 +41,7 @@ class DoctorRegistration(views.APIView):
                 auth_data = {
                     'login': request.data['login'],
                     'password': make_password(request.data['password']),
-                    'role': role_vale,
+                    'role': role_value,
                     'id': user_profile.id  # Assuming user profile ID is used in Auth
                 }
 
@@ -136,7 +137,7 @@ class AddPatient(views.APIView):
 
                 patient_data = {
                     'date_of_birth': request.data['date_of_birth'],
-                    'date_of_diagnosis': request.data['date_of_diagnosis'],
+                    'date_of_diagnosis': request.data.get('date_of_diagnosis', None),
                     'sex': Sex[request.data['sex']].value,
                     'user_id': user_profile.id
                 }
@@ -169,9 +170,11 @@ class AddPatient(views.APIView):
                 return Response(user_profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class PatientRegistration(views.APIView):
     def patch(self, request):
-        role_value = Role[request.data['role']].value  # to check if the data entered is ok
+        request.data['role'] = 'PATIENT'
+        role_value = Role[request.data['role']].value
         pesel = request.data['pesel']
         name = request.data['name']
         surname = request.data['surname']

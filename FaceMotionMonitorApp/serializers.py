@@ -71,6 +71,10 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'user_id']
+        extra_kwargs = {
+            'date_of_diagnosis': {'required': False, 'allow_null': True}
+        }
+
 
 class PatientSerializer1(serializers.ModelSerializer):
     user_profile = UserProfileSerializer(source='user_id', read_only=True)

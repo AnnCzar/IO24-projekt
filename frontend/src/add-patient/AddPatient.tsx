@@ -17,6 +17,7 @@ import "./AddPatient.css";
 
 import { ReactComponent as GoBack } from "../images/back.svg";
 import axios from "axios";
+import logo from "../images/Logo3.svg";
 
 interface FormValues {
   name: string;
@@ -38,34 +39,42 @@ function AddPatient() {
   };
 
 
-    const onSubmit = useCallback(     //ania
-    async (values: FormValues, formik: any) => {
-        console.log(values)
+    const onSubmit = useCallback(
+  async (values: FormValues, formik: any) => {
+    console.log(values);
 
-      try {
-        const response = await fetch('http://localhost:8000/addPatient/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ name: values.name, surname: values.surname, email: values.email, pesel: values.pesel,
-                date_of_birth: values.date_of_birth, date_of_diagnosis: values.date_of_diagnosis, sex: values.sex}),
-        });
+    try {
+      const response = await fetch('http://localhost:8000/addPatient/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: values.name,
+          surname: values.surname,
+          email: values.email,
+          pesel: values.pesel,
+          date_of_birth: values.date_of_birth,
+          date_of_diagnosis: values.date_of_diagnosis || null,
+          sex: values.sex
+        }),
+      });
 
-        console.log(response.url)
-        if (response.status === 201) {
-          setSuccessMessage("User has been successfully added!");
-          formik.resetForm();
-        } else {
-          setErrorMessage("Failed to add user. Please try again.");
-        }
-      } catch (error) {
-        setErrorMessage("An error occurred. Please try again.");
+      console.log(response.url);
+      if (response.status === 201) {
+        setSuccessMessage("User has been successfully added!");
+        formik.resetForm();
+      } else {
+        setErrorMessage("Failed to add user. Please try again.");
       }
-    },
-    [],
-  );
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again.");
+    }
+  },
+  []
+);
+
 
   const validationSchema = useMemo(
     () =>
@@ -76,13 +85,19 @@ function AddPatient() {
         pesel: yup.string().required("This field can't be empty").length(11, "Incorrect PESEL"),
         date_of_birth: yup.string().required("This field can't be empty"),
         sex: yup.string().required("This field can't be empty"),
+        date_of_diagnosis: yup.string().nullable(),
       }),
     [],
   );
 
+  const handleBackToPatients = () => {
+    navigate("/patients");
+  };
+
   return (
       <div className="background_add_patient">
           <header className="header_add_patient">ADD PATIENT</header>
+          <img src={logo} alt="Logo" className="logo_bottom" />
           <button className="goback_add_patient" onClick={handleGoBack}>
               <GoBack/>
               <span>Go back</span>
@@ -236,6 +251,14 @@ function AddPatient() {
                           >
                               CONFIRM
                           </Button>
+
+                          <Button
+                variant="outlined"
+                onClick={handleBackToPatients}
+                style={{ fontSize: '1rem' }}
+              >
+                Back to patients list
+              </Button>
                       </form>
                   )}
               </Formik>

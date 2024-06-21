@@ -1,60 +1,70 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import "./RegistrationForm.css";
-
-// interface FormValues {
-//   username: string;
-//   password: string;
-//   name: string;
-//   surname: string;
-//   pesel: string;
-//   pwz: string;
-// }
+import logo from "../images/Logo3.svg";
+interface FormValues {
+    name: string;
+    surname: string;
+    email: string;
+    pesel: string;
+    login: string;
+    password: string;
+    pwz_pwzf: string;
+}
 
 function RegistrationFormD() {
   const navigate = useNavigate();
-  const onSubmit = useCallback(
-     (values: { username: string, password: string, name: string, surname: string, pesel: string, pwz: string }, formik: any) => {
-      // apiClient.login(values).then((response) => {
-      //   console.log(response);
-      //   if (response.success) {
-      navigate('/patients');
-      //   } else {
-      //     formik.setFieldError('username', 'Invalid username or password');
-      //   }
-      // });
-    },
-    [navigate],
-  );
+
+  const onSubmit = async (values: FormValues) => {
+    try {
+        const response = await fetch('http://localhost:8000/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(values), // directly use values object
+        });
+
+        if (response.ok) {
+            console.log('Registration successful');
+            navigate('/patients');
+        } else {
+            const errorText = await response.text();
+            console.error('Registration failed:', errorText);
+        }
+    } catch (error) {
+        console.error('Error during registration:', error);
+    }
+  };
 
   const validationSchema = useMemo(
     () =>
       yup.object().shape({
-        username: yup.string().required("This field can't be empty"),
+        login: yup.string().required("This field can't be empty"),
         name: yup.string().required("This field can't be empty"),
         surname: yup.string().required("This field can't be empty"),
-
-        pesel: yup.string().required("This field can't be empty")
-            .length(11, "Incorrect PESEL"),
-        pwz: yup.string().required("This field can't be empty")
-            .length(7, "Incorrect Medical license"),
+        pesel: yup.string().required("This field can't be empty").length(11, "Incorrect PESEL"),
+        pwz_pwzf: yup.string().required("This field can't be empty").length(7, "Incorrect Medical license"),
+        email: yup.string().required("This field can't be empty")
+                .email("Invalid email address"),
         password: yup
           .string()
           .required("This field can't be empty")
           .min(5, "Password has to be at least 5 characters long"),
-
       }),
     [],
   );
 
   return (
     <div className="background_register">
-        <header className="header_register">SIGN UP</header>
+      <header className="header_register">SIGN UP</header>
+        <img src={logo} alt="Logo" className="logo_bottom" />
       <Formik
-        initialValues={{ username: "", password: "", name: "", surname: "", pesel: "", pwz: ""}}
+        initialValues={{ name: "", surname: "", email: "", pesel: "", login: "", password: "", pwz_pwzf:"" }}
         onSubmit={onSubmit}
         validationSchema={validationSchema}
         validateOnChange
@@ -78,9 +88,8 @@ function RegistrationFormD() {
               helperText={formik.touched.name && formik.errors.name}
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
-
             />
-           <TextField
+            <TextField
               id="surname"
               name="surname"
               label="Surname"
@@ -92,15 +101,28 @@ function RegistrationFormD() {
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
+              <TextField
+              id="email"
+              name="email"
+              label="Email"
+              variant="standard"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && !!formik.errors.email}
+              helperText={formik.touched.email && formik.errors.email}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
+            />
+
             <TextField
-              id="username"
-              name="username"
+              id="login"
+              name="login"
               label="Login"
               variant="standard"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.username && !!formik.errors.username}
-              helperText={formik.touched.username && formik.errors.username}
+              error={formik.touched.login && !!formik.errors.login}
+              helperText={formik.touched.login && formik.errors.login}
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
@@ -117,7 +139,6 @@ function RegistrationFormD() {
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
-
             <TextField
               id="pesel"
               name="pesel"
@@ -130,20 +151,18 @@ function RegistrationFormD() {
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
-
             <TextField
               id="pwz"
-              name="pwz"
+              name="pwz_pwzf"
               label="Medical license"
               variant="standard"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.pwz && !!formik.errors.pwz}
-              helperText={formik.touched.pwz && formik.errors.pwz}
+              error={formik.touched.pwz_pwzf && !!formik.errors.pwz_pwzf}
+              helperText={formik.touched.pwz_pwzf && formik.errors.pwz_pwzf}
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
-
             <Button
               variant="contained"
               type="submit"

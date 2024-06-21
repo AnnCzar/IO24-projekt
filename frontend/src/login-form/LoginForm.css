@@ -7,12 +7,12 @@
 }
 
 .login_text {
-  margin-bottom: 2vh; /* Use vh for consistent spacing */
+  margin-bottom: 2vh;
 }
 
 .login_form button {
   font-size: 1.2rem;
-  margin-top: 2vh; /* Use vh for consistent spacing */
+  margin-top: 2vh;
 }
 
 .background_login {
@@ -20,58 +20,57 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  min-height: 100vh;
+  height: 100vh; /* Adjusted to make the blue background narrower */
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
 }
 
 .header_login {
   color: white;
+  margin-top: 15vh;
   font-style: revert;
   font-size: 4vh;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 20vh;
-  margin-top: 10vh;
+  margin-bottom: 10vh;
 }
 
-/*.logo_bottom {*/
-/*  margin-top: 4vh;*/
-/*  width: 20vw;*/
-/*  height: auto;*/
-/*}*/
+.logo_bottom_log {
+  width: 60vw;
+  max-width: 1000px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  transform: translateX(30%);
+}
 
 .login_container {
-  padding: 4vh 2vw; /* Use vh and vw for padding */
-  border-radius: 10px;
+  padding: 5vh 2vw;
+  /*border-radius: 10px;*/
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90vw; /* Use vw for responsive width */
+  width: 90vw;
   max-width: 400px;
-
+  margin-top: 10vh;
+  border-radius: 0.5rem;
+  margin-bottom: 5vh;
 }
 
 @media (max-width: 600px) {
   .header_login {
-    font-size: 3vh; /* Adjust for smaller screens */
+    font-size: 3vh;
   }
 
   .login_form button {
     font-size: 1rem;
   }
-.logo_bottom {
-  margin-top: 4vh;
-  width: 30vw;
-  height: auto;
-  align-items: center;
-  max-width: 100%;
-}
 
-@media (max-width: 600px) {
-  .logo_bottom {
-    width: 50vw;
+  .logo_bottom_log {
+    width: 60vw;
+    max-width: 150px;
   }
-}
 }

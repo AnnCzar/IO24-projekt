@@ -15,6 +15,7 @@ interface FormValues {
 const LoginForm: React.FC = () => {
     const [loginError, setLoginError] = React.useState<string>("");
     const navigate = useNavigate();
+
     const onSubmit = async (values: FormValues) => {
         try {
             const response = await fetch('http://localhost:8000/login/', {
@@ -27,22 +28,15 @@ const LoginForm: React.FC = () => {
             });
 
             if (response.ok) {
-                try {
-                    const data = await response.json();
-                    const role = data.role;
-                    console.log('Login successful:', role);
-                    if (role == 'doctor') {
-
-                         navigate('/patients');
-                    } else if (role == 'patient'){
-                        navigate('/examination');
-                    }
-                    else if ((role == 'admin')){
-                        navigate('/allpatients');
-                    }
-                } catch (error) {
-                    console.error('Failed to parse JSON:', error);
-                    setLoginError('An error occurred while logging in.');
+                const data = await response.json();
+                const role = data.role;
+                console.log('Login successful:', role);
+                if (role === 'doctor') {
+                    navigate('/patients');
+                } else if (role === 'patient') {
+                    navigate('/examination');
+                } else if (role === 'admin') {
+                    navigate('/allpatients');
                 }
             } else {
                 const errorText = await response.text();
@@ -62,14 +56,13 @@ const LoginForm: React.FC = () => {
     const validationSchema = yup.object().shape({
         username: yup.string().required("Username is required"),
         password: yup.string().required("Password is required")
-                    .min(6, "Password must be at least 6 characters long"),
+            .min(6, "Password must be at least 6 characters long"),
     });
 
     return (
         <div className="background_login">
+            <header className="header_login">SIGN IN</header>
             <div className="login_container">
-                <header className="header_login">SIGN IN</header>
-
                 <Formik
                     initialValues={{ username: "", password: "" }}
                     onSubmit={onSubmit}
@@ -96,6 +89,7 @@ const LoginForm: React.FC = () => {
                                 helperText={formik.touched.username && formik.errors.username}
                                 InputLabelProps={{ style: { fontSize: "1.5rem" } }}
                                 fullWidth
+                                 style={{ marginBottom: '1rem' }}
                             />
                             <TextField
                                 id="password"
@@ -137,8 +131,7 @@ const LoginForm: React.FC = () => {
                         </form>
                     )}
                 </Formik>
-
-                <img src={logo} alt="Logo" className="logo_bottom" />
+                <img src={logo} alt="Logo" className="logo_bottom_log" />
             </div>
         </div>
     );

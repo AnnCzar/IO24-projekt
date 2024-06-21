@@ -1,22 +1,15 @@
-import React, {useCallback, useRef, useState} from "react";
+import React, {useCallback, useRef} from "react";
 import Webcam from "react-webcam";
-import WebcamRef from "react-webcam";
 import { Button } from "@mui/material";
 import "./Examination.css";
 import { ReactComponent as LogoutIcon } from "../images/logout.svg";
-import { ReactComponent as ReportsIcon } from "../images/reports.svg"
+import { ReactComponent as ReportsIcon } from "../images/reports.svg";
 import {useNavigate} from "react-router-dom";
+import logo from "../images/Logo3.svg";
 
 function Examination() {
     const navigate = useNavigate();
-    const webRef = useRef<WebcamRef>(null);
-
-    // const showImage = async () => {
-    //     if (webRef.current) {
-    //         const screenshot = await webRef.current.getScreenshot();
-    //         console.log(screenshot);
-    //     }
-    // };
+    const webRef = useRef<Webcam>(null);
 
     const handleLogOutClick = useCallback(() => {
         navigate('/login');
@@ -30,13 +23,14 @@ function Examination() {
         <div className="background_ex">
             <button className="myButton" onClick={handleLogOutClick}>
                 <LogoutIcon />
-                    <span>Log out</span>
+                <span>Log out</span>
             </button>
             <button className="reportsButton" onClick={handleReportsClick}>
                 <ReportsIcon className="icon" />
                 <span>Reports</span>
             </button>
             <header className="header_ex">EXAMINATION</header>
+            <img src={logo} alt="Logo" className="logo_bottom" />
             <div className="examination">
                 <div className="webcam-container">
                     <Webcam ref={webRef} />
@@ -46,7 +40,7 @@ function Examination() {
                 </Button>
             </div>
         </div>
-  );
+    );
 }
 
 export default Examination;

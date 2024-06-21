@@ -8,6 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
+import logo from "../images/Logo3.svg";
 import { ReactComponent as LogoutIcon } from "../images/logout.svg";
 import { ReactComponent as AddPatient } from "../images/add_patient.svg";
 import './Patients.css';
@@ -129,10 +130,13 @@ const Patients: React.FC = () => {
     <div className="background_patients">
       <header className="header_patients">PATIENTS</header>
       {error && <p className="error">{error}</p>}
+      <img src={logo} alt="Logo" className="logo_bottom" />
       <button className="log_out" onClick={handleLogOutClick}>
+
         <LogoutIcon />
         <span>Log out</span>
       </button>
+
       <button className="new_patient" onClick={handleAddPatientClick}>
         <AddPatient className="icon" />
         <span>Add patient</span>
@@ -173,6 +177,7 @@ const Patients: React.FC = () => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Paper>
+
       </div>
     </div>
   );

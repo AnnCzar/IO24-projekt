@@ -1,34 +1,54 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Button, TextField } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import "./RegistrationForm.css";
-import ReferencePhoto from "../reference-photo/ReferencePhoto";
+import { useNavigate } from "react-router-dom";
+import logo from "../images/Logo3.svg";
 
 interface FormValues {
-  username: string;
-  password: string;
   name: string;
   surname: string;
+  email: string;
   pesel: string;
+  login: string;
+  password: string;
 }
 
 function RegistrationFormP() {
-  const [redirect, setRedirect] = useState<boolean>(false);
+  const navigate = useNavigate();
 
-  const onSubmit = (values: FormValues, formik: any) => {
-    console.log(values);
-    setRedirect(true);
+  const onSubmit = async (values: FormValues) => {
+    try {
+      const response = await fetch("http://localhost:8000/registerPatient/", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        console.log("Registration successful");
+        navigate("/examination");
+      } else {
+        const errorText = await response.text();
+        console.error("Registration failed:", errorText);
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+    }
   };
 
   const validationSchema = useMemo(
     () =>
       yup.object().shape({
-        username: yup.string().required("This field can't be empty"),
         name: yup.string().required("This field can't be empty"),
         surname: yup.string().required("This field can't be empty"),
-
+        email: yup.string().required("This field can't be empty").email("Invalid email address"),
         pesel: yup.string().required("This field can't be empty").length(11, "Incorrect PESEL"),
+        login: yup.string().required("This field can't be empty"),
         password: yup
           .string()
           .required("This field can't be empty")
@@ -37,15 +57,12 @@ function RegistrationFormP() {
     []
   );
 
-  if (redirect) {
-    return <ReferencePhoto />;
-  }
-
   return (
     <div className="background_register">
       <header className="header_register">SIGN UP</header>
+        <img src={logo} alt="Logo" className="logo_bottom" />
       <Formik
-        initialValues={{ username: "", password: "", name: "", surname: "", pesel: "" }}
+        initialValues={{ name: "", surname: "", email: "", pesel: "", login: "", password: "" }}
         onSubmit={onSubmit}
         validationSchema={validationSchema}
         validateOnChange
@@ -78,14 +95,26 @@ function RegistrationFormP() {
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
             <TextField
-              id="username"
-              name="username"
+              id="email"
+              name="email"
+              label="Email"
+              variant="standard"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && !!formik.errors.email}
+              helperText={formik.touched.email && formik.errors.email}
+              InputLabelProps={{ style: { fontSize: '1.25rem' } }}
+              InputProps={{ style: { fontSize: '1.25rem' } }}
+            />
+            <TextField
+              id="login"
+              name="login"
               label="Login"
               variant="standard"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.username && !!formik.errors.username}
-              helperText={formik.touched.username && formik.errors.username}
+              error={formik.touched.login && !!formik.errors.login}
+              helperText={formik.touched.login && formik.errors.login}
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
@@ -127,4 +156,5 @@ function RegistrationFormP() {
     </div>
   );
 }
+
 export default RegistrationFormP;

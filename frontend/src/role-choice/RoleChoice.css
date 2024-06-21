@@ -10,7 +10,7 @@
 
 .role-choice button {
     font-size: 1.2rem;
-    margin-top: 2rem;
+    margin-top: 10vh;
 }
 
 .background_role {
@@ -31,4 +31,13 @@
     font-size: 4.375rem;
     font-weight: bold;
     text-align: center;
+    margin-bottom: 13vh;
+}
+.logo_bottom {
+
+  position: fixed;
+  bottom:-85vh;
+  left: 0;
+  width: 40vw;
+  height: auto;
 }

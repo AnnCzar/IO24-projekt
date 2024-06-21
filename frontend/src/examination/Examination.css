@@ -1,18 +1,32 @@
+.background_ex {
+  background-image: url('../images/background.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: calc(100vh - 3.75rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.header_ex {
+  color: white;
+  font-style: revert;
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2vh;
+  margin-top:8vh;
+}
+
 .examination {
   padding: 0.1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transform: translateY(3rem);
-}
-
-.background_ex {
-  background-image: url('../images/background.svg');
-  background-size: 100vw auto;
-  background-repeat: no-repeat;
-  background-position: center;
-  height: calc(100vh - 3.75rem);
+  transform: translateY(1rem);
 }
 
 .examination button {
@@ -20,14 +34,10 @@
   margin-top: 2rem;
 }
 
-.header_ex {
-  color: white;
-  transform: translateY(2rem);
-  font-style: revert;
-  font-size: 4rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1.25rem;
+.webcam-container {
+  margin-top: 15vh;
+  display: flex;
+  justify-content: center;
 }
 
 .myButton {
@@ -70,6 +80,14 @@
   background: transparent;
   border: none;
 }
+.logo_bottom {
+
+  position: fixed;
+  bottom:-85vh;
+  left: 0;
+  width: 40vw;
+  height: auto;
+}
 
 .reportsButton .icon {
   width: 5rem;
@@ -79,4 +97,37 @@
 .reportsButton span {
   margin-top: 0.3125rem;
   font-size: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .header_ex {
+    font-size: 2.5rem;
+  }
+
+  .myButton {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .myButton svg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .myButton span {
+    font-size: 1rem;
+  }
+
+  .reportsButton {
+    width: 5rem;
+  }
+
+  .reportsButton .icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .reportsButton span {
+    font-size: 1rem;
+  }
 }

@@ -11,7 +11,7 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import { ReactComponent as GoBack } from "../images/back.svg";
 import { ReactComponent as DeletePatient } from "../images/delete.svg";
-
+import logo from "../images/Logo3.svg";
 import './AllPatients.css';
 
 interface Column {
@@ -115,6 +115,7 @@ export default function AllPatients() {
   return (
     <div className="background_all_patients">
       <header className="header_all_patients">ALL PATIENTS</header>
+      <img src={logo} alt="Logo" className="logo_bottom" />
       <button className="goback_all_patients" onClick={handleGoBack}>
         <GoBack />
         <span>Go back</span>

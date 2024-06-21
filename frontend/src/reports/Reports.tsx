@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import {ReactComponent as GoBack} from "../images/back.svg";
-import './Reports.css';
+import logo from "../images/Logo3.svg";import './Reports.css';
 import {useEffect, useState} from "react";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {number} from "yup";
@@ -81,6 +81,7 @@ export default function Reports() {
     return (
         <div className="background_reports">
             <header className="header_reports">REPORTS</header>
+            <img src={logo} alt="Logo" className="logo_bottom" />
             <button className="go-back" onClick={handleGoBack}>
                 <GoBack/>
                 <span>Go back</span>
@@ -89,20 +90,21 @@ export default function Reports() {
                 <Paper sx={{width: '100%', overflow: 'hidden'}}>
                     <TableContainer className="table-container" sx={{maxHeight: 440}}>
                         <Table stickyHeader aria-label="sticky table" className="table">
-                            <TableHead>
-                                <TableRow className="table-header">
-                                    {columns.map((column, index) => (
-                                        <TableCell
-                                            key={column.id}
-                                            align={index === 0 ? 'center' : column.align}
-                                            style={{minWidth: column.minWidth}}
-                                            className={`no-bottom-border`}
-                                        >
-                                            <b>{column.label}</b>
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
+<TableHead>
+  <TableRow className="table-header">
+    {columns.map((column, index) => (
+      <TableCell
+        key={column.id}
+        align={index === 0 ? 'center' : column.align}
+        style={{minWidth: column.minWidth}}
+        className={`no-bottom-border`}
+      >
+        <b>{column.label}</b>
+      </TableCell>
+    ))}
+  </TableRow>
+</TableHead>
+
 
                             <TableBody>
                                 {rows

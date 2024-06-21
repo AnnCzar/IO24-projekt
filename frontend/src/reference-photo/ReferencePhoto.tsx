@@ -3,6 +3,7 @@ import Webcam from "react-webcam";
 import { Button } from "@mui/material";
 import "./ReferencePhoto.css";
 import {useNavigate} from "react-router-dom";
+import logo from "../images/Logo3.svg";
 
 function ReferencePhoto() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ function ReferencePhoto() {
   return (
     <div className="background_photo">
       <header className="header_photo">TAKE A REFERENCE PHOTO</header>
+      <img src={logo} alt="Logo" className="logo_bottom" />
       <div className="reference-photo">
         <div className="webcam-container">
           <Webcam ref={webRef} />
