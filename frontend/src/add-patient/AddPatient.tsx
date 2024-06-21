@@ -16,7 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import "./AddPatient.css";
 
 import { ReactComponent as GoBack } from "../images/back.svg";
-import axios from "axios";
 
 interface FormValues {
   name: string;

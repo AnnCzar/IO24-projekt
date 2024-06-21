@@ -13,6 +13,7 @@ from . import services
 from .ai_model.brudnopis import VideoProcessor
 from .backends.auth_backend import AuthBackend
 from .models import Role, Sex, UserProfile
+from .models.userProfile_models import Patient, Reports, DoctorAndPatient, Doctor, Auth
 from .serializers import *
 from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
@@ -280,62 +281,50 @@ def generate_frames():
 #
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-@api_view(['GET'])   # streams the video frames to the client
-=======
-# version with save to the database
-=======
->>>>>>> e28b81569f2d485c7b30012fde31a1400cf26645
-class CapturePhotoView(APIView):
-    def post(self, request):
-        data = request.data
-        image_data = data['image']
-        image_data = base64.b64decode(image_data.split(',')[1])
-        np_arr = np.frombuffer(image_data, np.uint8)
-        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+@api_view(['POST'])
+def capture_photo(request):
+    data = request.data
+    image_data = data['image']
+    image_data = base64.b64decode(image_data.split(',')[1])
+    np_arr = np.frombuffer(image_data, np.uint8)
+    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        date_now = date.today()
-        patient_id = 1  # example - change when session will be connect
+    date_now = date.today()
+    patient_id = 1  # example - change when session will be connect
 
-        processor = VideoProcessor()
-        _, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo()
+    processor = VideoProcessor()
+    img, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo(img)
 
-        ref_photo_data = {
-            'date': date_now,
-            'x_center': x_center,
-            'y_center': y_center,
-            'patient_id': patient_id
-        }
-        # addRefPhotoView(ref_photo_data)   # it's not working, because i cant get photo id
-        ref_photos_serializer = RefPhotosSerializer(data=ref_photo_data)
+    ref_photo_data = {
+        'date': date_now,
+        'x_center': x_center,
+        'y_center': y_center,
+        'patient_id': patient_id
+    }
 
-        for landmark, distnace in distances.items():
+    ref_photos_serializer = RefPhotosSerializer(data=ref_photo_data)
+
+    if ref_photos_serializer.is_valid():
+        ref_photos_serializer.save()
+
+        for landmark, distance in distances.items():
             ref_photo_landmarks_data = {
-                'x_cord': distnace,  # zmienic tabele
+                'x_cord': distance,
                 'y_cord': 0,
                 'landmark_number': landmark,
                 'ref_photo': ref_photos_serializer.data['id']
             }
-            ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(ref_photo_landmarks_data)
+            ref_photos_landmarks_serializer = RefPhotoLandmarksSerializer(data=ref_photo_landmarks_data)
             if ref_photos_landmarks_serializer.is_valid():
                 ref_photos_landmarks_serializer.save()
-                return Response(ref_photos_landmarks_serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(ref_photos_landmarks_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse(ref_photos_landmarks_serializer.errors, status=400)
 
-        if ref_photos_serializer.is_valid():
-            ref_photos_serializer.save()
-            return Response(ref_photos_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(ref_photos_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        if img_bytes is None:  # to nwm czy nie wywalic
-            return HttpResponse("Failed to capture photo.", status=500)
-
+        return JsonResponse(ref_photos_serializer.data, status=201)
+    else:
+        return JsonResponse(ref_photos_serializer.errors, status=400)
 
 @api_view(['GET'])  # streams the video frames to the client
->>>>>>> dd29bf3e906ab1df476df72605587a1a7845140e
 def video_stream(request):
     return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
@@ -465,6 +454,46 @@ def delete_user(request, user_id):
         # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
         return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
 
+
+@api_view(['DELETE'])    # for admin
+def delete_patient(request, patient_id):
+    try:
+        # Fetch the patient record
+        patient = Patient.objects.filter(id=patient_id).first()
+        if patient:
+            # Get the user_id related to the patient
+            user_id = patient.user_id_id
+
+            # Delete data from the Auth table
+            Auth.objects.filter(id=user_id).delete()
+
+            # Delete the patient record
+            patient.delete()
+
+            # Delete the assignment from the DoctorAndPatient table
+            DoctorAndPatient.objects.filter(patient_id=patient_id).delete()
+
+            # Delete the related UserProfile record
+            UserProfile.objects.filter(id=user_id).delete()
+
+            # Check if the user is also a doctor and delete if exists
+            # doctor = Doctor.objects.filter(user_id=user_id).first()
+            # if doctor:
+            #     doctor_id = doctor.id
+            #     doctor.delete()
+            #     # Delete the assignment from the DoctorAndPatient table
+            #     DoctorAndPatient.objects.filter(doctor_id=doctor_id).delete()
+
+            # Return HTTP response
+            return Response({'message': 'Patient deleted successfully'}, status=200)
+
+        else:
+            return Response({'error': 'Patient not found'}, status=404)
+
+    except Exception as e:
+        # Handle exception (e.g., database issue)
+        return Response({'error': 'Failed to delete patient', 'details': str(e)}, status=500)
+
 # def get_ref_photo_landmarks(patient_id):
 #     ref_photo = RefPhotos.objects.get(user_id=patient_id)
 #     ref_photo_id = ref_photo.id
@@ -581,3 +610,13 @@ class LogoutView(APIView):
             return Response({'message': 'User logged out successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_all_patients(request):
+    try:
+
+        patients = Patient.objects.all()
+    except Patient.DoesNotExist:
+        return Response({'error': 'No patient found'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = PatientsSerializer(patients, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
