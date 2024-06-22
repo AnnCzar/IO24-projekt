@@ -31,7 +31,7 @@ function RegistrationFormP() {
 
       if (response.ok) {
         console.log("Registration successful");
-        navigate("/examination");
+        navigate("/reference-photo");
       } else {
         const errorText = await response.text();
         console.error("Registration failed:", errorText);
