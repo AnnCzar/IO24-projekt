@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 SESSION_COOKIE_AGE = 86400  # 1 day in seconds
@@ -97,7 +98,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'fmm_database',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': 'szikimini',
         'HOST': '127.0.0.1',
         'PORT': '3306'
     }
