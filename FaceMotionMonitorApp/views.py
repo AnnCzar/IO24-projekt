@@ -276,9 +276,8 @@ def capture_photo(request):
 
     date_now = datetime.now().isoformat() + "Z"
 
-    user_id = request.session.get('user_id')  # example - change when session will be connect
-    patient = Doctor.objects.get(user_id_id=user_id)  # tutaj jest problem
-
+    user_id = request.session.get('user_id')
+    patient = Patient.objects.get(user_id_id=user_id)
     patient_id = patient.id
 
     processor = VideoProcessor()

@@ -1,7 +1,6 @@
-
 import React, { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
-import { Button } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from "@mui/material";
 import "./Examination.css";
 import { ReactComponent as LogoutIcon } from "../images/logout.svg";
 import { ReactComponent as ReportsIcon } from "../images/reports.svg";
@@ -13,16 +12,23 @@ function Examination() {
     const navigate = useNavigate();
     const webRef = useRef<Webcam>(null);
     const [isRecording, setIsRecording] = useState(false);
+    const [showInstruction, setShowInstruction] = useState(false);
 
     const handleLogOutClick = useCallback(() => {
         navigate('/login');
     }, [navigate]);
 
     const handleReportsClick = useCallback(() => {
-        navigate('/reports');
+        navigate('/reports-patient');
     }, [navigate]);
 
     const handleStartExamination = useCallback(() => {
+        setShowInstruction(true);
+    }, []);
+
+    const startRecording = useCallback(() => {
+        setShowInstruction(false);
+
         if (!webRef.current || !webRef.current.stream) return;
         setIsRecording(true);
 
@@ -43,51 +49,26 @@ function Examination() {
             }
         };
 
-        // mediaRecorder.onstop = async () => {
-        //     const blob = new Blob(recordedChunks, {
-        //         type: "video/webm"
-        //     });
-        //     const videoFile = new File([blob], "recording.webm", {
-        //         type: "video/webm"
-        //     });
-        //
-        //     const formData = new FormData();
-        //     formData.append('video', videoFile);
-        //
-        //     try {
-        //         const response = await axios.post('http://localhost:8000/add_recording/', formData, {
-        //             headers: {
-        //                 'Content-Type': 'multipart/form-data'
-        //             }
-        //         });
-        //         console.log("Video uploaded successfully:", response.data);
-        //     } catch (error) {
-        //         console.error("Error uploading video:", error);
-        //     } finally {
-        //         setIsRecording(false);
-        //     }
-        // };
+        mediaRecorder.onstop = async () => {
+            const blob = new Blob(recordedChunks, {type: 'video/webm'});
+            const videoFile = new File([blob], "recording.webm", {type: "video/webm"});
+            const formData = new FormData();
+            formData.append('video', videoFile);
 
-
-mediaRecorder.onstop = async () => {
-    const blob = new Blob(recordedChunks, {type: 'video/webm'});
-    const videoFile = new File([blob], "recording.webm", {type: "video/webm"});
-    const formData = new FormData();
-    formData.append('video', videoFile);
-
-    try {
-        const response = await axios.post('http://localhost:8000/add_recording/', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
-             withCredentials: true
-        });
-        console.log("Video uploaded successfully:", response.data);
-    } catch (error) {
-        console.error("Error uploading video:", error);
-    }
-};
-
+            try {
+                const response = await axios.post('http://localhost:8000/add_recording/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    withCredentials: true
+                });
+                console.log("Video uploaded successfully:", response.data);
+            } catch (error) {
+                console.error("Error uploading video:", error);
+            } finally {
+                setIsRecording(false);
+            }
+        };
 
         mediaRecorder.start();
         setTimeout(() => {
@@ -119,6 +100,22 @@ mediaRecorder.onstop = async () => {
                 >
                     {isRecording ? 'RECORDING...' : 'START EXAMINATION'}
                 </Button>
+                <Dialog
+                    open={showInstruction}
+                    onClose={() => setShowInstruction(false)}
+                >
+                    <DialogTitle>Instructions</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Smile as wide as you can.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={startRecording} color="primary">
+                            Start
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         </div>
     );

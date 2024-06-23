@@ -160,7 +160,7 @@ class RefPhotoLandmarksSerializer(serializers.ModelSerializer):
 class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reports
-        fields = ['id', 'date', 'difference_mouth', 'difference_face', 'patient_id']
+        fields = ['id', 'date', 'difference_mouth', 'difference_2', 'patient_id']
 
 class ReportsSerializer1(serializers.ModelSerializer):
     class Meta:
