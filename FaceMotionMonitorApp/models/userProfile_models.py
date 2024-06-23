@@ -56,7 +56,7 @@ class Recordings(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField()
     time = models.IntegerField()
-    patient_id = models.OneToOneField(UserProfile, on_delete=models.PROTECT)
+    patient_id = models.ForeignKey(UserProfile, on_delete=models.PROTECT)
 
 class Frames(models.Model):
     id = models.AutoField(primary_key=True)
@@ -64,25 +64,27 @@ class Frames(models.Model):
     timestamp = models.FloatField()
     x_center = models.FloatField()
     y_center = models.FloatField()
-    recording_id = models.OneToOneField(Recordings, on_delete=models.CASCADE)
+    recording_id = models.ForeignKey(Recordings, on_delete=models.CASCADE)
 
 class FrameLandmarks(models.Model):
     id = models.AutoField(primary_key=True)
     landmark_number = models.IntegerField()
     distance = models.FloatField()
-    frame_id = models.OneToOneField(Frames, on_delete=models.CASCADE)
+    frame_id = models.ForeignKey(Frames, on_delete=models.CASCADE)
+
 
 class RefPhotoLandmarks(models.Model):
-    id = models.AutoField(primary_key=True)
+    ref_photo = models.ForeignKey(RefPhotos, on_delete=models.CASCADE)
     landmark_number = models.IntegerField()
     distance = models.FloatField()
-    ref_photo = models.OneToOneField(RefPhotos, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('ref_photo', 'landmark_number')
 
 class Reports(models.Model):
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField()
     difference_mouth = models.FloatField()
     difference_2 = models.FloatField()
-    patient_id = models.OneToOneField(UserProfile, on_delete=models.PROTECT)
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
 

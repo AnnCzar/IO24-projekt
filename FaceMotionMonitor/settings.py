@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'rest_framework',
     'FaceMotionMonitorApp.apps.FacemotionmonitorappConfig',
 ]
 
@@ -169,3 +170,11 @@ LOGGING = {
     },
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+# Directory for temporary file storage
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+TEMP_DIR = BASE_DIR / 'temp'
+TEMP_DIR.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+
+

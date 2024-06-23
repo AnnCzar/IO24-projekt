@@ -116,10 +116,7 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 
-
-
 class FramesSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Frames
         fields = ['id', 'frame_number', 'timestamp', 'x_center', 'y_center', 'recording_id']
@@ -129,6 +126,7 @@ class FrameLandmarksSerializer(serializers.ModelSerializer):
     class Meta:
         model = FrameLandmarks
         fields = ['id', 'landmark_number', 'distance', 'frame_id']
+
 
 class RecordingsSerializer(serializers.ModelSerializer):
 
@@ -143,11 +141,21 @@ class RefPhotosSerializer(serializers.ModelSerializer):
         fields = ['id', 'date', 'x_center', 'y_center', 'patient_id']
 
 
+
 class RefPhotoLandmarksSerializer(serializers.ModelSerializer):
     class Meta:
         model = RefPhotoLandmarks
-        fields = ['id', 'landmark_number', 'distance', 'ref_photo']
+        fields = ['distance', 'landmark_number', 'ref_photo']
 
+    def validate(self, data):
+        ref_photo = data['ref_photo']
+        landmark_number = data['landmark_number']
+
+        # Sprawdź, czy istnieje już taki punkt odniesienia dla danego RefPhoto
+        if RefPhotoLandmarks.objects.filter(ref_photo=ref_photo, landmark_number=landmark_number).exists():
+            raise serializers.ValidationError("Landmark for this ref photo already exists.")
+
+        return data
 
 class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -169,6 +177,7 @@ class PatientSerializer1(serializers.ModelSerializer):
         model = Patient
         fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'pesel']  # Include pesel in the fields
 
+
 class PatientsSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='user_id.name')
     surname = serializers.CharField(source='user_id.surname')
@@ -177,11 +186,11 @@ class PatientsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ['id', 'name', 'surname', 'sex', 'email', 'date_of_last_exam']  # Include pesel in the fields
+        fields = ['id', 'name', 'surname', 'sex', 'email', 'date_of_last_exam']
+
     def get_date_of_last_exam(self, obj):
         # Pobieramy najnowszy raport dla danego pacjenta
-        latest_report = Reports.objects.filter(patient_id=obj.user_id).order_by('-date').first()
+        latest_report = Reports.objects.filter(patient_id=obj).order_by('-date').first()
         if latest_report:
             return latest_report.date
         return None
-

@@ -114,7 +114,7 @@ class VideoProcessor:
                     landmark_list.append((index, norm_x, norm_y))
 
                 land_list.append(landmark_list)
-                print(land_list)
+                # print(land_list)
                 x_center, y_center = self.face_center(landmark_list)
                 distances = self.calculate_distance(landmark_list)
 
@@ -125,7 +125,7 @@ class VideoProcessor:
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
+                # print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
 
         ret, buffer = cv2.imencode('.jpg', img)
         return img, buffer.tobytes()
@@ -167,7 +167,7 @@ class VideoProcessor:
                         landmark_list.append((index, norm_x, norm_y))
 
                     land_list.append(landmark_list)
-                    print(land_list)
+                    # print(land_list)
                     x_center, y_center = self.face_center(landmark_list)
                     distances = self.calculate_distance(landmark_list)
 
@@ -181,7 +181,7 @@ class VideoProcessor:
                         cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                                  (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                    print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
+                    # print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
             all_frames_data[frame_count] = frame_data
 
         cap.release()
@@ -212,7 +212,7 @@ class VideoProcessor:
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                print(f"Photo center: ({x_center}, {y_center}), Distances: {distances}")
+                # print(f"Photo center: ({x_center}, {y_center}), Distances: {distances}")
 
         ret, buffer = cv2.imencode('.jpg', img)
         return img, buffer.tobytes(), landmark_list, distances, x_center, y_center
