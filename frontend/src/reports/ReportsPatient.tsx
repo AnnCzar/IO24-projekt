@@ -50,11 +50,10 @@ interface Data {
     difference_2: number;
 }
 
-export default function Reports() {
-
+const ReportsPatient: React.FC = () => {
     const navigate = useNavigate();
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [error, setError] = useState<string | null>(null);
     const location = useLocation();
     const params = new URLSearchParams(location.search);
@@ -75,36 +74,36 @@ export default function Reports() {
     };
 
     const handleGenerateReport = () => {
-        // DODAĆ TO
+        // Implement this function as needed
     };
 
     useEffect(() => {
-        if (patientId) {
             fetchReports();
-        }
-    }, [patientId]);
+    }, []);
 
     const fetchReports = async () => {
-    try {
-        const response = await fetch(`http://localhost:8000/reports/doctor/${patientId}/`, {  // Note the trailing slash here
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-        });
+        try {
+            console.log("Fetching reports for patient ID:", patientId);
+            const response = await fetch(`http://localhost:8000/reports/patient/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
 
-        if (!response.ok) {
-            throw new Error('Failed to fetch reports');
+            if (!response.ok) {
+                throw new Error('Failed to fetch reports');
+            }
+
+            const data = await response.json();
+            console.log("Reports data:", data);
+            setRows(data);
+        } catch (error: any) {
+            console.error('Error fetching reports:', error.message);
+            setError(error.message);
         }
-
-        const data = await response.json();
-        setRows(data);
-    } catch (error: any) {
-        setError(error.message);
-    }
-};
-
+    };
 
     return (
         <div className="background_reports">
@@ -140,8 +139,7 @@ export default function Reports() {
                                             {columns.map((column) => {
                                                 const value = row[column.id as keyof Data];
                                                 return (
-                                                    <TableCell key={column.id} align="center"
-                                                        className="no-bottom-border">
+                                                    <TableCell key={column.id} align="center" className="no-bottom-border">
                                                         {column.format && typeof value !== 'undefined' ? column.format(value) : value}
                                                     </TableCell>
                                                 );
@@ -160,15 +158,16 @@ export default function Reports() {
                         onPageChange={handleChangePage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
-
                     <div className="button-container">
                         <Button variant="contained" type="submit" onClick={handleGenerateReport}>
                             Generate summary report
                         </Button>
                     </div>
-
                 </Paper>
+                {error && <div className="error-message">{error}</div>}
             </div>
         </div>
     );
-}
+};
+
+export default ReportsPatient;

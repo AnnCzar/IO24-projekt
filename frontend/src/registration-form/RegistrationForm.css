@@ -39,3 +39,9 @@
   width: 40vw;
   height: auto;
 }
+.error-message {
+  color: red;
+  margin-top: 10px;
+  font-size: 1.25rem;
+  text-align: center;
+}

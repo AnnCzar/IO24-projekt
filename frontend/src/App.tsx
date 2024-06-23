@@ -13,12 +13,12 @@ import AllPatients from "./all-patients/AllPatients";
 import PatientsId from "./patients-id/PatientsId";
 import Patients from "./patients/Patients";
 import Reports from "./reports/Reports";
+import ReportsPatient from "./reports/ReportsPatient";
 // import ApiProvider from './api/ApiProvider';
 
 function App() {
   return (
     <BrowserRouter>
-      {/*<ApiProvider>*/}
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LoginForm />} />
@@ -32,8 +32,8 @@ function App() {
         <Route path="/patientsid" element={<PatientsId />} />
         <Route path="/patients" element={<Patients />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/reports-patient" element={<ReportsPatient />} />
       </Routes>
-      {/*</ApiProvider>*/}
     </BrowserRouter>
   );
 }

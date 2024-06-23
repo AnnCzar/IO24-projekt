@@ -62,7 +62,7 @@ const Patients: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [rows, setRows] = useState<Data[]>([]); // Explicitly define the type as Data[]
+  const [rows, setRows] = useState<Data[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const fetchPatients = async () => {
@@ -123,7 +123,7 @@ const Patients: React.FC = () => {
   }, [navigate]);
 
   const handleRowClick = (patientId: number) => {
-    window.open(`/reports?patientId=${patientId}`, '_blank'); // Open the Reports component in a new tab
+    navigate(`/reports?patientId=${patientId}`);
   };
 
   return (
