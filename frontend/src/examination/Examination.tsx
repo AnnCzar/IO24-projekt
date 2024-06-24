@@ -119,6 +119,7 @@ function Examination() {
             <div className="examination">
                 <div className="webcam-container">
                     <Webcam audio={true} ref={webRef} />
+                    <div className="overlay-square"></div>
                 </div>
                 <Button
                     variant="contained"
