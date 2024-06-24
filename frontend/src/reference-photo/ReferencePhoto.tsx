@@ -70,6 +70,7 @@ function ReferencePhoto() {
       <div className="reference-photo">
         <div className="webcam-container">
           <Webcam ref={webRef} screenshotFormat="image/jpeg" />
+          <div className="overlay-square"></div>
         </div>
         <Button onClick={showImage} variant="contained" color="primary" className="picture-button">
           Picture
