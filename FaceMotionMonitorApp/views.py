@@ -76,14 +76,14 @@ class AddPatient(views.APIView):
             # Get user_id from session
             user_id = request.session.get('user_id')
 
-            doctor = Doctor.objects.get(user_id_id=user_id)  #tutaj jest problem
+            doctor = Doctor.objects.get(user_id_id=user_id)
             print(doctor)
             doctor_id = doctor.id
         except Doctor.DoesNotExist:
             return Response({'error': 'User is not logged in or session has expired'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-        if UserProfile.objects.filter(pesel=pesel).exists():  #patient exists
+        if UserProfile.objects.filter(pesel=pesel).exists():
             user_profile = UserProfile.objects.get(pesel=pesel)
             user_id = user_profile.id
 
@@ -129,7 +129,7 @@ class AddPatient(views.APIView):
                     'login': None,
                     'password': None,
                     'role': role_vale,
-                    'id': user_profile.id  # Assuming user profile ID is used in Auth
+                    'id': user_profile.id
                 }
 
                 patient_data = {
@@ -175,7 +175,7 @@ class PatientRegistration(views.APIView):
         surname = request.data['surname']
         email = request.data['email']
 
-        login_new = request.data['login']  # to change in auth table
+        login_new = request.data['login']
         password = request.data['password']
 
         if UserProfile.objects.filter(pesel=pesel).exists() and role_value == Role['PATIENT'].value:

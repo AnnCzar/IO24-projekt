@@ -1,6 +1,15 @@
 import React, { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from "@mui/material";
+import {
+    Alert,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Typography
+} from "@mui/material";
 import "./Examination.css";
 import { ReactComponent as LogoutIcon } from "../images/logout.svg";
 import { ReactComponent as ReportsIcon } from "../images/reports.svg";
@@ -13,6 +22,9 @@ function Examination() {
     const webRef = useRef<Webcam>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [showInstruction, setShowInstruction] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
 
     const handleLogOutClick = useCallback(() => {
         navigate('/login');
@@ -62,8 +74,10 @@ function Examination() {
                     },
                     withCredentials: true
                 });
+                setSuccessMessage("Video uploaded successfully");
                 console.log("Video uploaded successfully:", response.data);
             } catch (error) {
+                setErrorMessage("Error occured during uploading a video");
                 console.error("Error uploading video:", error);
             } finally {
                 setIsRecording(false);
@@ -78,6 +92,20 @@ function Examination() {
 
     return (
         <div className="background_ex">
+            {successMessage && <Alert severity="success" style={{
+              position: 'fixed',
+              bottom: 0,
+              width: '100%',
+              textAlign: 'center',
+              zIndex: 9999
+          }}>{successMessage}</Alert>}
+           {errorMessage && <Alert severity="error" style={{
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 9999
+      }}>{errorMessage}</Alert>}
             <button className="myButton" onClick={handleLogOutClick}>
                 <LogoutIcon />
                 <span>Log out</span>

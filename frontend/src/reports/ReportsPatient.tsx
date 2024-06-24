@@ -35,7 +35,7 @@ const columns: readonly Column[] = [
     },
     {
         id: 'difference_2',
-        label: 'Difference 2',
+        label: 'Difference eyebrow',
         minWidth: 170,
         align: 'center',
         format: (value: string) => value,
