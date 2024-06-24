@@ -107,7 +107,8 @@ function Examination() {
                     <DialogTitle>Instructions</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Smile as wide as you can.
+                            position your head so that it is as directly facing the camera as possible and fits entirely within the frame.
+                            Then, smile as widely as you can until the end of the test (10 seconds).
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

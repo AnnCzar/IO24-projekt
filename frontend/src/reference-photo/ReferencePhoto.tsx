@@ -11,7 +11,7 @@ function ReferencePhoto() {
   const [photoTaken, setPhotoTaken] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [open, setOpen] = useState(true); // State to handle dialog visibility
+  const [open, setOpen] = useState(true);
 
   const handleConfirmClick = () => {
     navigate('/examination');
@@ -73,7 +73,8 @@ function ReferencePhoto() {
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           <DialogContentText>
-            Make a neutral face and click the button to take a reference photo.
+            Position your head so that it is as directly facing the camera as possible and fits entirely within the frame.
+            Then, make a neutral face and click the button to take a reference photo.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
