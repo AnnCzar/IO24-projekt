@@ -162,10 +162,10 @@ class ReportsSerializer(serializers.ModelSerializer):
         model = Reports
         fields = ['id', 'date', 'difference_mouth', 'difference_2', 'patient_id']
 
-class ReportsSerializer1(serializers.ModelSerializer):
-    class Meta:
-        model = Reports
-        fields = ['id', 'date', 'difference_mouth', 'difference_2']
+# class ReportsSerializer1(serializers.ModelSerializer):
+#     class Meta:
+#         model = Reports
+#         fields = ['id', 'date', 'difference_mouth', 'difference_2']
 
 
 

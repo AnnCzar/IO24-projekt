@@ -29,6 +29,7 @@ function ReferencePhoto() {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ image: screenshot }),
         });
 
