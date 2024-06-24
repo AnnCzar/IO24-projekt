@@ -76,7 +76,6 @@ class AddPatient(views.APIView):
             # Get user_id from session
             user_id = request.session.get('user_id')
 
-
             doctor = Doctor.objects.get(user_id_id=user_id)  #tutaj jest problem
             print(doctor)
             doctor_id = doctor.id
@@ -167,7 +166,6 @@ class AddPatient(views.APIView):
                 return Response(user_profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class PatientRegistration(views.APIView):
     def patch(self, request):
         request.data['role'] = 'PATIENT'
@@ -186,9 +184,6 @@ class PatientRegistration(views.APIView):
             if user_profile.name == name and user_profile.surname == surname and user_profile.email == email:
 
                 user_id = user_profile.id
-
-
-
 
                 try:
                     user = Auth.objects.get(pk=user_id)
@@ -230,11 +225,11 @@ class LoginView(APIView):
             request.session['user_id'] = user.id_id
             request.session.modified = True
             request.session.save()
-            return Response({'message': 'User logged in', 'role': user.role, 'user_id': user.id_id}, status=status.HTTP_200_OK)
+            return Response({'message': 'User logged in', 'role': user.role, 'user_id': user.id_id},
+                            status=status.HTTP_200_OK)
         else:
 
             return Response('Nieprawidłowe dane logowania', status=400)
-
 
 
 class GetUserRoleView(View):
@@ -277,7 +272,9 @@ def capture_photo(request):
     date_now = datetime.now().isoformat() + "Z"
 
     user_id = request.session.get('user_id')
-    patient = Patient.objects.get(user_id_id=user_id)
+
+    patient = Patient.objects.get(user_id_id=user_id)  # tutaj jest problem
+
     patient_id = patient.id
 
     processor = VideoProcessor()
@@ -312,6 +309,7 @@ def capture_photo(request):
     else:
         return Response(ref_photos_serializer.errors, status=400)
 
+
 @api_view(['GET'])  # streams the video frames to the client
 def video_stream(request):
     return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
@@ -324,6 +322,7 @@ def start_video_processing(request):
 
 @api_view(['POST'])
 def add_recording(request):
+    global frame_id
     user_id = request.session.get('user_id')
 
     try:
@@ -361,6 +360,7 @@ def add_recording(request):
             })
             if frame_serializer.is_valid():
                 frame = frame_serializer.save()
+                frame_id = frame.id
                 for landmark_index, distance in frame_data['landmarks'].items():
                     landmark_serializer = FrameLandmarksSerializer(data={
                         'frame_id': frame.id,
@@ -371,32 +371,45 @@ def add_recording(request):
                         landmark_serializer.save()
                     else:
                         return Response(landmark_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(frame_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Debugging to check the format of landmark_list
-        # print(f"landmark_list: {landmark_list}")
-        #
-        # # Ensure that calculate_difference receives correct landmark_list
-        # if isinstance(landmark_list, list) and all(isinstance(point, tuple) and len(point) == 3 for point in landmark_list):
-        #     mouth_diff, eyebrow_diff = calculate_difference(landmark_list, recording_data['patient_id'])
-        # else:
-        #     return Response({'error': 'Invalid landmark list'}, status=status.HTTP_400_BAD_REQUEST)
-        #
         # # Save differences into Reports
+        # report_data = {
+        #     'date': date_now,
+        #     'difference_mouth': 1,  #zmienic na mouth_diff jak bedzie dzialac liczenie
+        #     'difference_2': 2,  #zmienic na eyebrow_diff jak bedzie dzialac liczenie
+        #     'patient_id_id': patient.id,  # Użyj identyfikatora pacjenta
+        # }
+        # Reports.objects.create(**report_data)
+
+        current_frame_landmarks = FrameLandmarks.objects.filter(frame_id=frame_id)
+        ref_photo_id = RefPhotos.objects.filter(patient_id_id=patient.id).order_by('-date').first().id
+
+        current_distances = {landmark.landmark_number: landmark.distance for landmark in current_frame_landmarks}
+
+        ref_landmarks = RefPhotoLandmarks.objects.filter(ref_photo=ref_photo_id)
+        ref_distances = {landmark.landmark_number: landmark.distance for landmark in ref_landmarks}
+        date_now = datetime.now().isoformat() + "Z"
+        differences = {}
+        for landmark in ref_distances.keys():
+            if landmark in current_distances:
+                differences[landmark] = abs(ref_distances[landmark] - current_distances[landmark])
+
         report_data = {
+            'patient_id': patient.id,
             'date': date_now,
-            'difference_mouth': 1,  #zmienic na mouth_diff jak bedzie dzialac liczenie
-            'difference_2': 2,  #zmienic na eyebrow_diff jak bedzie dzialac liczenie
-            'patient_id_id': patient.id,  # Użyj identyfikatora pacjenta
+            'difference_mouth': differences.get(61, 0),  # Assuming 61 is a landmark for the mouth
+            'difference_2': differences.get(291, 0),  # Assuming 291 is another critical landmark
         }
-        Reports.objects.create(**report_data)
+        report_serializer = ReportsSerializer(data=report_data)
+        if report_serializer.is_valid():
+            report_serializer.save()
 
         return Response(recordings_serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# to trzeba wywalic stad i dac gdzies indziej
+
+
 
 
 # def calculate_difference(landmark_list, patient_id):
@@ -430,7 +443,8 @@ def calculate_difference(landmark_list, patient_id):
     # Upewnij się, że landmark_list jest listą krotek
     if not isinstance(landmark_list, list) or not all(
             isinstance(point, tuple) and len(point) == 3 for point in landmark_list):
-        raise ValueError(f"Oczekiwana lista krotek punktów orientacyjnych, otrzymano {type(landmark_list)} w niepoprawnym formacie")
+        raise ValueError(
+            f"Oczekiwana lista krotek punktów orientacyjnych, otrzymano {type(landmark_list)} w niepoprawnym formacie")
 
     # Obliczanie bieżących odległości
     current_mouth = processor.calculate_distance_mouth(landmark_list)
@@ -444,8 +458,10 @@ def calculate_difference(landmark_list, patient_id):
     print(f"ref_landmarks: {ref_landmarks}")
 
     # Upewnij się, że ref_landmarks jest słownikiem, gdzie klucze to indeksy punktów orientacyjnych, a wartościami są liczby
-    if not isinstance(ref_landmarks, dict) or not all(isinstance(k, int) and isinstance(v, (float, int)) for k, v in ref_landmarks.items()):
-        raise ValueError(f"Oczekiwany słownik punktów orientacyjnych, otrzymano {type(ref_landmarks)} w niepoprawnym formacie")
+    if not isinstance(ref_landmarks, dict) or not all(
+            isinstance(k, int) and isinstance(v, (float, int)) for k, v in ref_landmarks.items()):
+        raise ValueError(
+            f"Oczekiwany słownik punktów orientacyjnych, otrzymano {type(ref_landmarks)} w niepoprawnym formacie")
 
     # Obliczanie odległości referencyjnych bez dodatkowego przetwarzania
     ref_mouth = ref_landmarks[61]
@@ -458,7 +474,7 @@ def calculate_difference(landmark_list, patient_id):
     return mouth_diff, eyebrow_diff
 
 
-@api_view(['DELETE'])    # not used
+@api_view(['DELETE'])  # not used
 def delete_user(request, user_id):
     try:
         # Usunięcie danych z tabeli Auth
@@ -488,8 +504,7 @@ def delete_user(request, user_id):
         return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
 
 
-
-@api_view(['DELETE'])    # for admin
+@api_view(['DELETE'])  # for admin
 def delete_patient(request, patient_id):
     try:
 
@@ -519,6 +534,7 @@ def delete_patient(request, patient_id):
         # Handle exception (e.g., database issue)
         return Response({'error': 'Failed to delete patient', 'details': str(e)}, status=500)
 
+
 # def get_ref_photo_landmarks(patient_id):
 #     ref_photo = RefPhotos.objects.get(user_id=patient_id)
 #     ref_photo_id = ref_photo.id
@@ -545,7 +561,6 @@ def get_patients_by_doctor(request):
         doctor_id = doctor.id
         doctor_patient_relations = DoctorAndPatient.objects.filter(doctor_id=doctor_id)
         patient_ids = doctor_patient_relations.values_list('patient_id', flat=True)
-
 
         patients = Patient.objects.filter(id__in=patient_ids).select_related('user_id')
 
@@ -620,7 +635,6 @@ def get_reports_for_patient_view(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class LogoutView(APIView):
