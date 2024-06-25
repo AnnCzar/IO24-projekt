@@ -15,13 +15,32 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import TemplateView
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
 from FaceMotionMonitorApp.views import DoctorRegistration, LoginView, AddPatient, PatientRegistration, \
     video_stream, start_video_processing, capture_photo, \
-    delete_user, GetUserRoleView, get_patients_by_doctor, get_reports_for_doctor_view, patient_details_view, \
-    get_reports_for_patient_view, LogoutView, delete_patient, get_all_patients, add_recording
+    delete_user, get_patients_by_doctor, get_reports_for_doctor_view, patient_details_view, \
+    get_reports_for_patient_view, CreateReportView, CreateReportViewDOC, LogoutView, delete_patient, get_all_patients, add_recording
+schema_view = get_schema_view(
+   openapi.Info(
+      title="API Documentation",
+      default_version='v1',
+      description="Test description",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="contact@local.com"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
+
+
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,22 +59,12 @@ urlpatterns = [
     path('delete_patient/<int:patient_id>/', delete_patient, name='delete_patient'),
     path('patients/', get_all_patients, name='get_all_patients'),
     path('add_recording/', add_recording, name='add_recording'),
-
-
     path('logout/', LogoutView.as_view(), name='logout'),
-
-
-
-
-    # paths for testing in the postman, later there will be one path ----------------
-    # path('addRecording/', AddRecordingView.as_view(), name='add_recording'),
-    # path('addFrame/', AddFrameView.as_view(), name='add_frame'),
-    # path('addLandmarks/', AddFrameLandmarksView.as_view(), name='add_landmarks'),
-    path('get-user-role/', GetUserRoleView.as_view(), name='get_user_role'),
-
-    # -------------------------------------
-
-
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('create-report/', CreateReportView.as_view(), name='create-report'),
+    path('create-report_doc/', CreateReportViewDOC.as_view(), name='create-reportDOC'),
 
     path('', TemplateView.as_view(template_name='index.html')),
 

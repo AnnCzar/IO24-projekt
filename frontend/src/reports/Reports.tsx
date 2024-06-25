@@ -74,8 +74,34 @@ export default function Reports() {
         navigate(-1);
     };
 
-    const handleGenerateReport = () => {
-        // DODAĆ TO
+    const handleGenerateReport = async () => {
+        if (!patientId) {
+            setError('Patient ID is not specified.');
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/create-report_doc/", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({patient_id: patientId})
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate report');
+            }
+
+            const result = await response.json();
+            console.log(result.message);
+
+            // If success, handle success message or action
+        } catch (error) {
+            console.error('Error generating report:', error);
+            setError('Error generating report. Please try again.');
+        }
     };
 
     useEffect(() => {
