@@ -65,6 +65,8 @@ function AddPatient() {
       if (response.status === 201) {
         setSuccessMessage("User has been successfully added!");
         formik.resetForm();
+      } else if(response.status === 400)  {
+          setErrorMessage("Failed to add user. Pateint with given pesel already exists for this doctor.");
       } else {
         setErrorMessage("Failed to add user. Please try again.");
       }

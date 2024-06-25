@@ -35,7 +35,7 @@ const columns: readonly Column[] = [
     },
     {
         id: 'difference_2',
-        label: 'Difference 2',
+        label: 'Difference eyebrow',
         minWidth: 170,
         align: 'center',
         format: (value: string) => value,
@@ -73,8 +73,24 @@ const ReportsPatient: React.FC = () => {
         navigate(-1);
     };
 
-    const handleGenerateReport = () => {
-        // Implement this function as needed
+    const handleGenerateReport = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/create-report/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate report');
+            }
+
+            // If success, the browser will automatically download the PDF file
+        } catch (error) {
+            setError('Error generating report. Please try again. dziala');
+        }
     };
 
     useEffect(() => {

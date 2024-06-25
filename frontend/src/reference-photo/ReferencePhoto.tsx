@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from "react";
 import Webcam from "react-webcam";
-import { Button, Dialog, DialogContent, DialogContentText, DialogActions } from "@mui/material";
+import {Button, Dialog, DialogContent, DialogContentText, DialogActions, Alert} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "./ReferencePhoto.css";
 import logo from "../images/Logo3.svg";
@@ -11,7 +11,8 @@ function ReferencePhoto() {
   const [photoTaken, setPhotoTaken] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [open, setOpen] = useState(true); // State to handle dialog visibility
+  const [open, setOpen] = useState(true);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleConfirmClick = () => {
     navigate('/examination');
@@ -51,10 +52,25 @@ function ReferencePhoto() {
   return (
     <div className="background_photo">
       <header className="header_photo">TAKE A REFERENCE PHOTO</header>
+      {successMessage && <Alert severity="success" style={{
+              position: 'fixed',
+              bottom: 0,
+              width: '100%',
+              textAlign: 'center',
+              zIndex: 9999
+          }}>{successMessage}</Alert>}
+           {errorMessage && <Alert severity="error" style={{
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 9999
+      }}>{errorMessage}</Alert>}
       <img src={logo} alt="Logo" className="logo_bottom" />
       <div className="reference-photo">
         <div className="webcam-container">
           <Webcam ref={webRef} screenshotFormat="image/jpeg" />
+          <div className="overlay-square"></div>
         </div>
         <Button onClick={showImage} variant="contained" color="primary" className="picture-button">
           Picture
@@ -73,7 +89,8 @@ function ReferencePhoto() {
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           <DialogContentText>
-            Make a neutral face and click the button to take a reference photo.
+            Position your head so that it is as directly facing the camera as possible and fits entirely within the frame.
+            Then, make a neutral face and click the button to take a reference photo.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

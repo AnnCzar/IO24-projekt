@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
-import { Button, TextField } from "@mui/material";
+import React, {useMemo, useState} from "react";
+import {Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, TextField} from "@mui/material";
 import { Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import "./RegistrationForm.css";
 import logo from "../images/Logo3.svg";
+
 interface FormValues {
     name: string;
     surname: string;
@@ -17,6 +18,9 @@ interface FormValues {
 
 function RegistrationFormD() {
   const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [open, setOpen] = useState(false); // Initially set to false
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -31,12 +35,15 @@ function RegistrationFormD() {
 
         if (response.ok) {
             console.log('Registration successful');
-            navigate('/patients');
+            setSuccessMessage("User has been successfully registered! Please log in to app now.");
+            setOpen(true); // Show the dialog box
         } else {
             const errorText = await response.text();
+            setErrorMessage("Failed to register user. Please try again.");
             console.error('Registration failed:', errorText);
         }
     } catch (error) {
+        setErrorMessage("An error occurred. Please try again.");
         console.error('Error during registration:', error);
     }
   };
@@ -59,10 +66,29 @@ function RegistrationFormD() {
     [],
   );
 
+  const handleClose = () => {
+    setOpen(false);
+    navigate('/login');
+  };
+
   return (
     <div className="background_register">
       <header className="header_register">SIGN UP</header>
         <img src={logo} alt="Logo" className="logo_bottom" />
+        {successMessage && <Alert severity="success" style={{
+              position: 'fixed',
+              bottom: 0,
+              width: '100%',
+              textAlign: 'center',
+              zIndex: 9999
+          }}>{successMessage}</Alert>}
+           {errorMessage && <Alert severity="error" style={{
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
+        textAlign: 'center',
+        zIndex: 9999
+      }}>{errorMessage}</Alert>}
       <Formik
         initialValues={{ name: "", surname: "", email: "", pesel: "", login: "", password: "", pwz_pwzf:"" }}
         onSubmit={onSubmit}
@@ -101,7 +127,7 @@ function RegistrationFormD() {
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
-              <TextField
+            <TextField
               id="email"
               name="email"
               label="Email"
@@ -113,7 +139,6 @@ function RegistrationFormD() {
               InputLabelProps={{ style: { fontSize: '1.25rem' } }}
               InputProps={{ style: { fontSize: '1.25rem' } }}
             />
-
             <TextField
               id="login"
               name="login"
@@ -173,6 +198,18 @@ function RegistrationFormD() {
           </form>
         )}
       </Formik>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogContent>
+          <DialogContentText>
+            User has been successfully registered! Please log in to app now.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

@@ -1,14 +1,14 @@
 import base64
 from datetime import date, datetime
-
+import os
 import cv2
 import numpy as np
 from django.core.files.storage import default_storage
-from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponse, StreamingHttpResponse, JsonResponse, FileResponse
 from django.views import View
 from rest_framework import views
 from rest_framework.decorators import api_view
-
+from .ai_model.reports.report import create_report
 from . import services
 from .ai_model.brudnopis import VideoProcessor
 from .backends.auth_backend import AuthBackend
@@ -19,10 +19,45 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .services import get_patient_details
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.permissions import AllowAny
 
 
 class DoctorRegistration(views.APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Registers a new doctor",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'login': openapi.Schema(type=openapi.TYPE_STRING, description='Login for the doctor'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password for the doctor'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address of the doctor'),
+                'pwz_pwzf': openapi.Schema(type=openapi.TYPE_STRING, description='PWZ number of the doctor'),
+            },
+            required=['login', 'password', 'email', 'pwz_pwzf']
+        ),
+        responses={
+            201: 'Created',
+            400: 'Bad Request'
+        }
+    )
     def post(self, request):
+        """
+                Registers a new doctor.
+
+                This method handles the registration process for a new doctor. It validates the input data,
+                creates the necessary user profile, authentication data, and doctor profile, and saves them
+                to the database.
+
+                Args:
+                - request (Request): The request object containing doctor data.
+
+                Returns:
+                - Response: A response with the authentication data if registration is successful, otherwise an error message.
+                """
         request.data['role'] = 'DOCTOR'
         role_value = Role[request.data['role']].value
         pwz = request.data['pwz_pwzf']
@@ -66,9 +101,44 @@ class DoctorRegistration(views.APIView):
 
 
 class AddPatient(views.APIView):
+    permission_classes = [AllowAny]  # Allows access to any user
 
-    #TODO add data validation (if pesel is in DB, check if the user is the patient)
+    @swagger_auto_schema(
+        operation_description="Adds a new patient or associates an existing one with the logged-in doctor.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'pesel': openapi.Schema(type=openapi.TYPE_STRING, description='PESEL number of the patient'),
+                'date_of_birth': openapi.Schema(type=openapi.TYPE_STRING, description='Date of birth of the patient'),
+                'date_of_diagnosis': openapi.Schema(type=openapi.TYPE_STRING,
+                                                    description='Date of diagnosis (optional)'),
+                'sex': openapi.Schema(type=openapi.TYPE_STRING, description='Sex of the patient (M/F)'),
+                'other_fields': openapi.Schema(type=openapi.TYPE_STRING, description='Additional fields as required'),
+            },
+            required=['pesel', 'date_of_birth', 'sex']
+        ),
+        responses={
+            201: 'Patient added successfully',
+            400: 'Bad Request'
+        }
+    )
     def post(self, request):
+        """
+               POST method to add a new patient or associate an existing patient with the logged-in doctor.
+
+               This method checks if the patient already exists in the database based on 'pesel' (PESEL number).
+               If the patient exists, it associates the patient with the doctor.
+               If the patient does not exist, it creates a new patient profile and associates it with the doctor.
+
+               Returns:
+                   - 201 Created: Patient successfully added or associated.
+                   - 400 Bad Request: Errors in input data or unauthorized access.
+
+               Possible Errors:
+                   - If user is not logged in or session has expired, returns 401 Unauthorized.
+                   - If the doctor is not authorized (not logged in as a doctor), returns 400 Bad Request.
+                   - If the patient is already associated with the doctor, returns 400 Bad Request.
+               """
         role_vale = Role['PATIENT'].value
         pesel = request.data.get('pesel')
 
@@ -76,14 +146,14 @@ class AddPatient(views.APIView):
             # Get user_id from session
             user_id = request.session.get('user_id')
 
-            doctor = Doctor.objects.get(user_id_id=user_id)  #tutaj jest problem
+            doctor = Doctor.objects.get(user_id_id=user_id)
             print(doctor)
             doctor_id = doctor.id
         except Doctor.DoesNotExist:
             return Response({'error': 'User is not logged in or session has expired'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-        if UserProfile.objects.filter(pesel=pesel).exists():  #patient exists
+        if UserProfile.objects.filter(pesel=pesel).exists():
             user_profile = UserProfile.objects.get(pesel=pesel)
             user_id = user_profile.id
 
@@ -116,10 +186,6 @@ class AddPatient(views.APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
         else:  #creating new patient
             user_profile_serializer = UserProfileSerializer(data=request.data)
-            # try:
-            #     doctor_id = int(request.data['doctor_id'])
-            # except ValueError:
-            #     return Response({"error": "Invalid doctor_id"}, status=status.HTTP_400_BAD_REQUEST)
             doctor_user_id = Doctor.objects.get(id=doctor_id).user_id
 
             if user_profile_serializer.is_valid() and Auth.objects.get(id=doctor_user_id).role == Role['DOCTOR'].value:
@@ -129,7 +195,7 @@ class AddPatient(views.APIView):
                     'login': None,
                     'password': None,
                     'role': role_vale,
-                    'id': user_profile.id  # Assuming user profile ID is used in Auth
+                    'id': user_profile.id
                 }
 
                 patient_data = {
@@ -167,7 +233,33 @@ class AddPatient(views.APIView):
 
 
 class PatientRegistration(views.APIView):
+    @swagger_auto_schema(
+        operation_description="Updates authentication information for an existing patient.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'pesel': openapi.Schema(type=openapi.TYPE_STRING, description='PESEL number of the patient'),
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the patient'),
+                'surname': openapi.Schema(type=openapi.TYPE_STRING, description='Surname of the patient'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address of the patient'),
+                'login': openapi.Schema(type=openapi.TYPE_STRING, description='New login for authentication'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='New password for authentication'),
+            },
+            required=['pesel', 'name', 'surname', 'email', 'login', 'password']
+        ),
+        responses={
+            200: 'Authentication information updated successfully',
+            400: 'Bad Request'
+        }
+    )
     def patch(self, request):
+        """
+            Patch API endpoint to update authentication information for an existing patient.
+
+            This endpoint allows an existing patient to update their authentication information,
+            including login and password, by verifying their PESEL number and other personal details.
+            """
+
         request.data['role'] = 'PATIENT'
         role_value = Role[request.data['role']].value
         pesel = request.data['pesel']
@@ -175,7 +267,7 @@ class PatientRegistration(views.APIView):
         surname = request.data['surname']
         email = request.data['email']
 
-        login_new = request.data['login']  # to change in auth table
+        login_new = request.data['login']
         password = request.data['password']
 
         if UserProfile.objects.filter(pesel=pesel).exists() and role_value == Role['PATIENT'].value:
@@ -212,7 +304,41 @@ class PatientRegistration(views.APIView):
 
 
 class LoginView(APIView):
+    @swagger_auto_schema(
+        operation_description="Updates authentication information for an existing patient.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'pesel': openapi.Schema(type=openapi.TYPE_STRING, description='PESEL number of the patient'),
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the patient'),
+                'surname': openapi.Schema(type=openapi.TYPE_STRING, description='Surname of the patient'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email address of the patient'),
+                'login': openapi.Schema(type=openapi.TYPE_STRING, description='New login for authentication'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='New password for authentication'),
+            },
+            required=['pesel', 'name', 'surname', 'email', 'login', 'password']
+        ),
+        responses={
+            200: 'Authentication information updated successfully',
+            400: 'Bad Request'
+        }
+    )
     def post(self, request):
+        """
+                PATCH method to update authentication information for an existing patient.
+
+                This method verifies if the patient exists in the database based on 'pesel' (PESEL number).
+                It checks if the provided profile data (name, surname, email) matches the existing profile.
+                If valid, it updates the login and password for authentication using AuthUpdateSerializer.
+
+                Returns:
+                    - 200 OK: Authentication information updated successfully.
+                    - 400 Bad Request: Errors in input data, mismatch in profile data, or patient not found.
+
+                Possible Errors:
+                    - If the patient with the provided PESEL number is not found, returns 400 Bad Request.
+                    - If the provided profile data (name, surname, email) does not match the existing profile, returns 400 Bad Request.
+                """
         print(request)
 
         login_value = request.data.get('login')
@@ -231,18 +357,27 @@ class LoginView(APIView):
 
             return Response('Nieprawidłowe dane logowania', status=400)
 
-
-class GetUserRoleView(View):
-    def get(self, request):
-        username = request.GET.get('login')
-        try:
-            user = Auth.objects.get(login=login)
-            return JsonResponse({'role': user.role})
-        except Auth.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
-
-
 def generate_frames():
+    """
+            GET method to retrieve the role of a user by their login username.
+
+            This method expects a 'login' parameter in the query string to identify the user.
+            It queries the Auth model to find a user with the specified login username.
+            If found, it returns the role of the user as JSON response.
+            If not found, it returns an error message with status code 404.
+
+            Returns:
+                - 200 OK: Returns JSON with the user's role.
+                - 404 Not Found: If no user is found with the provided login.
+
+            Example:
+                GET /api/user-role/?login=johndoe
+
+            Response:
+                {
+                    'role': 'ADMIN'
+                }
+            """
     processor = VideoProcessor()  # call VideoProcessor class from AI model
     while True:
         frame = processor.process_frame()
@@ -251,18 +386,43 @@ def generate_frames():
         yield (b'--frame\r\n'  # returns the processed frame as a byte string
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-
-# class CapturePhotoView(APIView):
-#     def get(self, request):
-#         processor = VideoProcessor()
-#         _, img_bytes, landmark_list, distances, x_center, y_center = processor.capture_photo()
-#         if img_bytes is None:
-#             return HttpResponse("Failed to capture photo.", status=500)
-#         return HttpResponse(img_bytes, content_type='image/jpeg')
-#
-
 @api_view(['POST'])
+@swagger_auto_schema(
+        operation_description="Capture and process a photo, saving it as a reference photo for a patient.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'image': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY,
+                                        description='Base64-encoded image data')
+            },
+            required=['image']
+        ),
+        responses={
+            201: 'Created',
+            400: 'Bad Request'
+        }
+    )
 def capture_photo(request):
+    """
+       Endpoint to capture and process a photo from request data.
+
+       Args:
+           request (HttpRequest): The HTTP request object containing image data.
+
+       Returns:
+           Response: HTTP response indicating success or failure of photo capture
+                     and processing.
+
+       Raises:
+           Patient.DoesNotExist: If the patient corresponding to the user_id
+                                  from session does not exist.
+
+       Note:
+           This function captures an image from the request, decodes it,
+           associates it with a patient, processes landmarks, and saves
+           the reference photo and its landmarks in the database.
+       """
+
     data = request.data
     image_data = data['image']
     image_data = base64.b64decode(image_data.split(',')[1])
@@ -315,13 +475,47 @@ def video_stream(request):
     return StreamingHttpResponse(generate_frames(), content_type='multipart/x-mixed-replace; boundary=frame')
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Starts the video processing and returns a confirmation message.",
+    responses={200: openapi.Response(description="Video processing started.")}
+)
 @api_view(['GET'])  # just a message that recoding has started
 def start_video_processing(request):
+    """
+        GET API endpoint to start video processing.
+
+        This endpoint starts the video processing task and returns a confirmation message
+        to the client indicating that video processing has started.
+        """
     return HttpResponse("Video processing started.")
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_description="Adds a new video recording and processes it to extract frame and landmark information.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'video': openapi.Schema(type=openapi.TYPE_FILE, description='Video file for processing'),
+        },
+        required=['video']
+    ),
+    responses={
+        201: openapi.Response(description='Recording added and processed successfully.'),
+        400: openapi.Response(description='Bad Request.'),
+        404: openapi.Response(description='Patient not found.'),
+    }
+)
 @api_view(['POST'])
 def add_recording(request):
+    """
+        POST API endpoint to add a new video recording and process it.
+
+        This endpoint accepts a video file, processes it to extract frame and landmark information,
+        and stores the results in the database. It also generates a report based on the differences
+        between current frame landmarks and reference photo landmarks.
+        """
     global frame_id
     user_id = request.session.get('user_id')
 
@@ -372,15 +566,6 @@ def add_recording(request):
                     else:
                         return Response(landmark_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # # Save differences into Reports
-        # report_data = {
-        #     'date': date_now,
-        #     'difference_mouth': 1,  #zmienic na mouth_diff jak bedzie dzialac liczenie
-        #     'difference_2': 2,  #zmienic na eyebrow_diff jak bedzie dzialac liczenie
-        #     'patient_id_id': patient.id,  # Użyj identyfikatora pacjenta
-        # }
-        # Reports.objects.create(**report_data)
-
         current_frame_landmarks = FrameLandmarks.objects.filter(frame_id=frame_id)
         ref_photo_id = RefPhotos.objects.filter(patient_id_id=patient.id).order_by('-date').first().id
 
@@ -409,35 +594,20 @@ def add_recording(request):
         return Response(recordings_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
-# def calculate_difference(landmark_list, patient_id):
-#     # distances = [data['distance'] for data in landmarks_data]
-#     processor = VideoProcessor()
-#
-#     #odleglosci z obecnego pomiaru
-#     # na razie mamy mouth - odległość między kącikami ust, bez porównaniado zdjęcia bazowego - można ewentualnie zmienić na koniec
-#     # mouth = processor.calculate_distance_mouth(landmark_list)
-#     # current_eyebrow = (processor.calculate_distance(landmark_list)[55] + processor.calculate_distance(landmark_list)[285]) / 2  #srednia odleglosci brwi od srodka
-#     if not isinstance(landmark_list, list) or not all(
-#             isinstance(point, tuple) and len(point) == 3 for point in landmark_list):
-#         raise ValueError(f"Expected a list of landmark points, got {type(landmark_list)} with incorrect format")
-#
-#     ref_eyebrow = (processor.calculate_distance(landmark_list[55]) + processor.calculate_distance(
-#         landmark_list[285])) / 2
-#     # ... rest of the code
-#     #odleglosci z base photo
-#     ref_landmarks = services.get_ref_distances_for_landmarks(patient_id, [55, 285])
-#     # ref_mouth = processor.calculate_distance_mouth(ref_landmarks)
-#     ref_eyebrow = processor.calculate_distance(ref_landmarks[55] + processor.calculate_distance(ref_landmarks[285])) / 2 #srednia odleglosc brwi od srodka dla reference photo
-#
-#
-#     # roznica pomiedzy obecnym wynikiem a ze zdjecia bazowego
-#     eyebrow_diff = current_eyebrow - ref_eyebrow
-#     return mouth, eyebrow_diff
-#
 def calculate_difference(landmark_list, patient_id):
+    """
+        Calculate the differences between the current and reference distances for mouth and eyebrow landmarks.
+
+        Args:
+            landmark_list (list): List of tuples representing the landmark points. Each tuple contains three elements.
+            patient_id (int): The ID of the patient.
+
+        Returns:
+            tuple: A tuple containing the differences for mouth and eyebrow landmarks (mouth_diff, eyebrow_diff).
+
+        Raises:
+            ValueError: If the landmark_list is not a list of tuples or if the ref_landmarks is not in the expected format.
+        """
     processor = VideoProcessor()
 
     # Upewnij się, że landmark_list jest listą krotek
@@ -473,9 +643,22 @@ def calculate_difference(landmark_list, patient_id):
 
     return mouth_diff, eyebrow_diff
 
-
+@swagger_auto_schema(
+    method='delete',
+    operation_description="Deletes a user and their associated data.",
+    responses={
+        200: openapi.Response(description='User deleted successfully.'),
+        500: openapi.Response(description='Failed to delete user.')
+    }
+)
 @api_view(['DELETE'])  # not used
 def delete_user(request, user_id):
+    """
+        DELETE API endpoint to delete a user and their associated data.
+
+        This endpoint deletes a user from the Auth table and also removes associated data
+        if the user is a patient or a doctor.
+        """
     try:
         # Usunięcie danych z tabeli Auth
         Auth.objects.filter(id=user_id).delete()
@@ -503,11 +686,24 @@ def delete_user(request, user_id):
         # Obsługa wyjątku (np. gdy wystąpi problem z bazą danych)
         return Response({'error': 'Failed to delete user', 'details': str(e)}, status=500)
 
-
+@swagger_auto_schema(
+    method='delete',
+    operation_description="Deletes a patient and their associated data by patient ID.",
+    responses={
+        200: openapi.Response(description='Patient deleted successfully.'),
+        404: openapi.Response(description='Patient not found.'),
+        500: openapi.Response(description='Failed to delete patient.')
+    }
+)
 @api_view(['DELETE'])  # for admin
 def delete_patient(request, patient_id):
-    try:
+    """
+        DELETE API endpoint to delete a patient and their associated data.
 
+        This endpoint is intended for administrative use to delete a patient and their associated
+        data including authentication, user profile, and patient-doctor assignments.
+        """
+    try:
         patient = Patient.objects.filter(id=patient_id).first()
         if patient:
 
@@ -534,18 +730,23 @@ def delete_patient(request, patient_id):
         # Handle exception (e.g., database issue)
         return Response({'error': 'Failed to delete patient', 'details': str(e)}, status=500)
 
-
-# def get_ref_photo_landmarks(patient_id):
-#     ref_photo = RefPhotos.objects.get(user_id=patient_id)
-#     ref_photo_id = ref_photo.id
-#     ref_photo_landmarks = RefPhotoLandmarks.objects.filter(ref_photo_id=ref_photo_id)
-#     landmarks_list = []
-#     for landmark in ref_photo_landmarks:
-#         landmarks_list.append([landmark.landmark_number, landmark.distance])
-#     return landmarks_list
-
+@swagger_auto_schema(
+    method='get',
+    operation_description="Fetches patients associated with the logged-in doctor.",
+    responses={
+        200: openapi.Response(description='List of patients fetched successfully.'),
+        401: openapi.Response(description='User is not logged in or session has expired.'),
+        404: openapi.Response(description='No doctor found for this user.'),
+        400: openapi.Response(description='Bad request.'),
+    }
+)
 @api_view(['GET'])
 def get_patients_by_doctor(request):
+    """
+       GET API endpoint to fetch patients associated with the logged-in doctor.
+
+       This endpoint retrieves the list of patients that are associated with the currently logged-in doctor.
+       """
     try:
         # Get user_id from session
         user_id = request.session.get('user_id')
@@ -571,8 +772,24 @@ def get_patients_by_doctor(request):
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_description="Fetches reports for a specific patient associated with the logged-in doctor.",
+    responses={
+        200: openapi.Response(description='List of reports fetched successfully.'),
+        401: openapi.Response(description='User is not logged in or session has expired.'),
+        404: openapi.Response(description='No doctor found for this user or no reports found for the patient.'),
+        400: openapi.Response(description='Bad request.'),
+    }
+)
+
 @api_view(['GET'])
 def get_reports_for_doctor_view(request, patient_id):
+    """
+        GET API endpoint to fetch reports for a specific patient associated with the logged-in doctor.
+
+        This endpoint retrieves the list of reports for a patient associated with the currently logged-in doctor.
+        """
     try:
         # Get user_id from session
         user_id = request.session.get('user_id')
@@ -601,16 +818,43 @@ def get_reports_for_doctor_view(request, patient_id):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@swagger_auto_schema(
+    method='get',
+    operation_description="Fetches details of the patient associated with the logged-in doctor.",
+    responses={
+        200: openapi.Response(description='Patient details fetched successfully.'),
+        401: openapi.Response(description='User is not logged in or session has expired.'),
+        400: openapi.Response(description='Bad request.'),
+    }
+)
 @api_view(['GET'])
 def patient_details_view(request):
+    """
+        GET API endpoint to fetch details of the patient associated with the logged-in doctor.
+
+        This endpoint retrieves and returns details of the patient associated with the currently logged-in doctor.
+        """
     user_doctor_id = request.session.get('user_id')
     details = get_patient_details(request)
     return Response(details, status=200)
 
-
+@swagger_auto_schema(
+    method='get',
+    operation_description="Fetches reports for the logged-in patient.",
+    responses={
+        200: openapi.Response(description='List of reports fetched successfully.'),
+        401: openapi.Response(description='User is not logged in or session has expired.'),
+        404: openapi.Response(description='No patient found for this user or no reports found for the patient.'),
+        400: openapi.Response(description='Bad request.'),
+    }
+)
 @api_view(['GET'])
 def get_reports_for_patient_view(request):
+    """
+       GET API endpoint to fetch reports for the logged-in patient.
+
+       This endpoint retrieves the list of reports for the patient associated with the currently logged-in user.
+       """
     try:
         # Get user_id from session
         user_id = request.session.get('user_id')
@@ -655,3 +899,62 @@ def get_all_patients(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CreateReportView(APIView):
+    def post(self, request):
+        try:
+            # Generate the report
+            user_id = request.session.get('user_id')
+            patient_id = Patient.objects.get(user_id=user_id).id
+
+            today = date.today()
+            patient_data = get_patient_details(patient_id)
+            file_name = patient_data["name"] + "report" + str(today) + ".pdf"
+            x = create_report(patient_id)
+
+            # Path to the generated PDF
+            file_path = os.path.join(os.getcwd(), x)
+            return Response({'error': 'dziala'}, status=status.HTTP_200_OK)
+            # Return the PDF file as a response
+            # if os.path.exists(file_path):
+            #     with open(file_path, 'rb') as pdf_file:
+            #         response = FileResponse(pdf_file, content_type='application/pdf')
+            #         response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+            #         return response
+            # else:
+            #     return Response({'error': 'Report generation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class CreateReportViewDOC(APIView):
+    def post(self, request):
+        try:
+            patient_id = request.data.get('patient_id')
+
+            if not patient_id:
+                return Response({'error': 'Patient ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate the report
+            today = date.today()
+            patient_data = services.get_patient_details(patient_id)
+
+            file_name = f"{patient_data['name']}report{today}.pdf"
+            x = create_report(patient_id)
+
+            # Path to the generated PDF
+            file_path = os.path.join(os.getcwd(), x)
+
+            # Return a success message or the file
+            if os.path.exists(file_path):
+                return Response({'message': 'Report generated successfully.'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Report generation failed.'},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            return Response({'error dziala': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
