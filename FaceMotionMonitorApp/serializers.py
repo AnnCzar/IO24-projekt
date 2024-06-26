@@ -6,7 +6,6 @@ from FaceMotionMonitorApp.models import UserProfile
 from FaceMotionMonitorApp.models.userProfile_models import Auth, Doctor, Patient, DoctorAndPatient, Recordings, Frames, \
     FrameLandmarks, RefPhotos, RefPhotoLandmarks, Reports
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
@@ -32,7 +31,6 @@ def validate_login(value):  # to check if login is taken
         raise serializers.ValidationError("Login already exists.")
     else:
         return False
-
 
 class AuthUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,11 +80,12 @@ class PatientSerializer1(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ['id', 'date_of_birth', 'date_of_diagnosis', 'sex', 'user_profile']
+
 class DoctorAndPatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorAndPatient
         fields = ['id', 'patient_id', 'doctor_id']
-    #
+
 
 
 def validate_pesel(value):  # to check if pesel of patient is in db
@@ -161,13 +160,6 @@ class ReportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reports
         fields = ['id', 'date', 'difference_mouth', 'difference_2', 'patient_id']
-
-# class ReportsSerializer1(serializers.ModelSerializer):
-#     class Meta:
-#         model = Reports
-#         fields = ['id', 'date', 'difference_mouth', 'difference_2']
-
-
 
 
 class PatientSerializer1(serializers.ModelSerializer):

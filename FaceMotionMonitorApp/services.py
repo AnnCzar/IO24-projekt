@@ -1,14 +1,27 @@
 from django.db.models import Max
-from django.utils import timezone
-
-from FaceMotionMonitorApp.models.userProfile_models import Recordings, Frames, FrameLandmarks, RefPhotoLandmarks, \
-    RefPhotos, UserProfile, Auth, Doctor
-from FaceMotionMonitorApp.models.userProfile_models import DoctorAndPatient, Patient, UserProfile, Reports
-from FaceMotionMonitorApp.serializers import ReportsSerializer, PatientSerializer, AuthUpdateSerializer, \
-    DoctorAndPatientSerializer, DoctorSerializer, AuthSerializer, UserProfileSerializer
+from FaceMotionMonitorApp.models.userProfile_models import (
+    Recordings, Frames, FrameLandmarks, RefPhotoLandmarks,
+    RefPhotos, Auth, Doctor, DoctorAndPatient, Patient,
+    UserProfile, Reports
+)
+from FaceMotionMonitorApp.serializers import (
+    ReportsSerializer, PatientSerializer, AuthUpdateSerializer,
+    DoctorAndPatientSerializer, DoctorSerializer, AuthSerializer,
+    UserProfileSerializer
+)
 
 
 def create_user_profile(data):
+    """
+    Create a user profile.
+
+    Args:
+        data (dict): The data for the user profile.
+
+    Returns:
+        UserProfile: The created user profile instance.
+        dict: The errors if the serializer is not valid.
+    """
     user_profile_serializer = UserProfileSerializer(data=data)
     if user_profile_serializer.is_valid():
         return user_profile_serializer.save()
@@ -16,6 +29,16 @@ def create_user_profile(data):
 
 
 def create_auth(auth_data):
+    """
+    Create an auth entry.
+
+    Args:
+        auth_data (dict): The data for the auth entry.
+
+    Returns:
+        Auth: The created auth instance.
+        dict: The errors if the serializer is not valid.
+    """
     auth_serializer = AuthSerializer(data=auth_data)
     if auth_serializer.is_valid():
         return auth_serializer.save()
@@ -23,6 +46,16 @@ def create_auth(auth_data):
 
 
 def create_doctor(doctor_data):
+    """
+    Create a doctor entry.
+
+    Args:
+        doctor_data (dict): The data for the doctor.
+
+    Returns:
+        Doctor: The created doctor instance.
+        dict: The errors if the serializer is not valid.
+    """
     doctor_serializer = DoctorSerializer(data=doctor_data)
     if doctor_serializer.is_valid():
         return doctor_serializer.save()
@@ -30,6 +63,17 @@ def create_doctor(doctor_data):
 
 
 def add_patient_to_doctor(patient_id, doctor_id):
+    """
+    Link a patient to a doctor.
+
+    Args:
+        patient_id (int): The ID of the patient.
+        doctor_id (int): The ID of the doctor.
+
+    Returns:
+        DoctorAndPatient: The created relationship instance.
+        dict: The errors if the serializer is not valid.
+    """
     patient_and_doctor_data = {
         'patient_id': patient_id,
         'doctor_id': doctor_id
@@ -41,6 +85,17 @@ def add_patient_to_doctor(patient_id, doctor_id):
 
 
 def update_auth(user, new_data):
+    """
+    Update authentication data.
+
+    Args:
+        user (Auth): The user instance to update.
+        new_data (dict): The new data for the user.
+
+    Returns:
+        Auth: The updated user instance.
+        dict: The errors if the serializer is not valid.
+    """
     serializer = AuthUpdateSerializer(user, data=new_data)
     if serializer.is_valid():
         return serializer.save()
@@ -48,6 +103,16 @@ def update_auth(user, new_data):
 
 
 def delete_user(user_id):
+    """
+    Delete a user and related entries.
+
+    Args:
+        user_id (int): The ID of the user to delete.
+
+    Returns:
+        dict: Success message or error details.
+        int: HTTP status code.
+    """
     try:
         Auth.objects.filter(id=user_id).delete()
         patient = Patient.objects.filter(user_id=user_id).first()
@@ -69,6 +134,16 @@ def delete_user(user_id):
 
 
 def get_patients_by_doctor(user_id):
+    """
+    Get patients by doctor ID.
+
+    Args:
+        user_id (int): The user ID of the doctor.
+
+    Returns:
+        list: Serialized patient data.
+        str: Error message if any.
+    """
     try:
         doctor = Doctor.objects.get(user_id=user_id)
         doctor_id = doctor.id
@@ -82,6 +157,17 @@ def get_patients_by_doctor(user_id):
 
 
 def get_reports_for_doctor(doctor_id, patient_id):
+    """
+    Get reports for a doctor by doctor ID and patient ID.
+
+    Args:
+        doctor_id (int): The ID of the doctor.
+        patient_id (int): The ID of the patient.
+
+    Returns:
+        list: Serialized report data.
+        str: Error message if any.
+    """
     if DoctorAndPatient.objects.filter(doctor_id=doctor_id, patient_id=patient_id).exists():
         reports = Reports.objects.filter(patient_id=patient_id)
         serializer = ReportsSerializer(reports, many=True)
@@ -90,6 +176,15 @@ def get_reports_for_doctor(doctor_id, patient_id):
 
 
 def calculate_difference(landmarks_data):
+    """
+    Calculate differences between landmarks.
+
+    Args:
+        landmarks_data (list): A list of landmark data.
+
+    Returns:
+        tuple: Differences for mouth and eyebrow.
+    """
     distances = [data['distance'] for data in landmarks_data]
     mouth_diff = 0
     eyebrow_diff = 0
@@ -97,23 +192,38 @@ def calculate_difference(landmarks_data):
 
 
 def get_reports_for_patient(patient_id):
+    """
+    Get reports for a patient by patient ID.
+
+    Args:
+        patient_id (int): The ID of the patient.
+
+    Returns:
+        list: Serialized report data.
+        str: Error message if any.
+    """
     reports = Reports.objects.filter(patient_id=patient_id)
     serializer = ReportsSerializer(reports, many=True)
     return serializer.data, None
 
 
 def get_max_landmark_distance(patient_id, landmark_number):
+    """
+    Get the maximum landmark distance for a patient by patient ID and landmark number.
+
+    Args:
+        patient_id (int): The ID of the patient.
+        landmark_number (int): The landmark number.
+
+    Returns:
+        dict: The maximum distance for the specified landmark.
+    """
     try:
-        # Get the latest recording for the given patient
         latest_recording = Recordings.objects.filter(patient_id=patient_id).latest('date')
-
-        # Get the frames associated with the latest recording
         frames = Frames.objects.filter(recording_id=latest_recording)
-
-        # Get the maximum distance for the specified landmark number
         max_distance = FrameLandmarks.objects.filter(frame_id__in=frames, landmark_number=landmark_number).aggregate(
-            Max('distance'))
-
+            Max('distance')
+        )
         return max_distance
     except Recordings.DoesNotExist:
         return None  # Handle case where no recordings exist for the patient
@@ -123,74 +233,45 @@ def get_max_landmark_distance(patient_id, landmark_number):
         return None  # Handle case where no landmarks exist for the frames
 
 
-# Example usage
-# patient_id = 1  # Replace with actual patient ID
-# landmark_number = 2  # Replace with the desired landmark number
-# max_distance = get_max_landmark_distance(patient_id, landmark_number)
-
-
 def get_patients_for_doctor(doctor_id):
+    """
+    Get patients for a doctor by doctor ID.
+
+    Args:
+        doctor_id (int): The ID of the doctor.
+
+    Returns:
+        dict: A dictionary with patient data and user data.
+    """
     try:
-        # Pobranie rekordów z tabeli DoctorAndPatient dla danego doktora
         doctor_patients = DoctorAndPatient.objects.filter(doctor_id=doctor_id)
-
-        # Pobranie identyfikatorów pacjentów przypisanych do danego doktora
         patient_ids = [dp.patient_id for dp in doctor_patients]
-
-        # Pobranie danych pacjentów na podstawie ich identyfikatorów
         patients = Patient.objects.filter(id__in=patient_ids)
-
-        # Pobranie danych użytkowników dla pacjentów
         users = UserProfile.objects.filter(id__in=[patient.user_id_id for patient in patients])
-
-        # Stworzenie słownika, gdzie klucz to ID pacjenta, a wartość to dane pacjenta i użytkownika
         patient_data = {}
         for patient in patients:
             patient_data[patient.id] = {
                 'patient_data': patient,
                 'user_data': next((user for user in users if user.id == patient.user_id_id), None)
             }
-
-        # Zwrócenie słownika
         return patient_data
     except Exception as e:
-        # Obsługa wyjątku (np. gdy nie ma pacjentów przypisanych do danego doktora)
         print(f"Error occurred: {e}")
         return {}
 
 
-#EXAMPLE
-# patients_data = get_patients_for_doctor(doctor_id)
-#
-# # Wyświetlenie danych pacjentów
-# for patient_id, data in patients_data.items():
-#     print("Patient ID:", patient_id)
-#     print("Patient Data:", data['patient_data'])
-#     print("User Data:", data['user_data'])
-#     print("\n")
-
-
-def get_reports_for_patient(patient_id):
-    try:
-        # Pobranie wszystkich raportów dla danego pacjenta
-        reports = Reports.objects.filter(patient_id_id=patient_id)
-        # Zwrócenie raportów
-        return reports
-    except Exception as e:
-        # Obsługa wyjątku (np. gdy nie ma raportów dla danego pacjenta)
-        print(f"Error occurred: {e}")
-        return []
-
-
-#FOR REPORTS PATIENT DATA
 def get_patient_details(patient_id):
-    # Fetch the patient object based on the patient_id
-    patient = Patient.objects.get(id=patient_id)
-    user_profile = patient.user_id_id
-    # Fetch the related user profile
-    user_profile = UserProfile.objects.get(id=user_profile)
+    """
+    Get patient details for reports by patient ID.
 
-    # Prepare the patient details
+    Args:
+        patient_id (int): The ID of the patient.
+
+    Returns:
+        dict: A dictionary with patient details.
+    """
+    patient = Patient.objects.get(id=patient_id)
+    user_profile = UserProfile.objects.get(id=patient.user_id_id)
     patient_details = {
         'name': user_profile.name,
         'surname': user_profile.surname,
@@ -198,62 +279,58 @@ def get_patient_details(patient_id):
         'date_of_birth': patient.date_of_birth,
         'date_of_diagnosis': patient.date_of_diagnosis,
     }
-
     return patient_details
 
 
-#EXAMPLE
-# reports = get_reports_for_patient(patient_id)
-#
-# # Wyświetlenie danych raportów
-# for report in reports:
-#     print("Report ID:", report.id)
-#     print("Date:", report.date)
-#     print("Difference Mouth:", report.difference_mouth)
-#     print("Difference 2:", report.difference_2)
-#     print("\n")
-
-
 def get_ref_distances_for_landmarks(patient_id, landmark_numbers):
+    """
+    Get reference distances for landmarks by patient ID and landmark numbers.
+
+    Args:
+        patient_id (int): The ID of the patient.
+        landmark_numbers (list): A list of landmark numbers.
+
+    Returns:
+        dict: A dictionary with distances for selected landmarks.
+    """
     try:
-        # Pobranie wszystkich landmarków dla danego pacjenta
         landmarks = RefPhotoLandmarks.objects.filter(ref_photo__patient_id_id=patient_id,
                                                      landmark_number__in=landmark_numbers)
-
-        # Stworzenie słownika, gdzie kluczem będzie numer landmarku, a wartością dystans dla tego landmarku
         distances = {}
         for landmark in landmarks:
             distances[landmark.landmark_number] = landmark.distance
-
-        # Zwrócenie słownika z dystansami dla wybranych landmarków
         return distances
     except Exception as e:
-        # Obsługa wyjątku (np. gdy nie ma danych dla danego pacjenta lub landmarków)
         print(f"Error occurred: {e}")
         return {}
 
 
-#EXAMPLE
-# patient_id = 1
-# landmark_numbers = [1, 2, 3]
-# distances = get_ref_distances_for_landmarks(patient_id, landmark_numbers)
-# for landmark_number, distance in distances.items():
-#     print(f"Landmark {landmark_number}: Distance = {distance}")
-
-
 def get_centers_for_patient(patient_id):
+    """
+    Get centers for patient by patient ID.
+
+    Args:
+        patient_id (int): The ID of the patient.
+
+    Returns:
+        list: A list of tuples with x_center and y_center.
+    """
     try:
         photos = RefPhotos.objects.filter(patient_id_id=patient_id)
         centers = [(photo.x_center, photo.y_center) for photo in photos]
-        # Zwrócenie listy krotek z współrzędnymi x_center i y_center dla zdjęć referencyjnych
         return centers
     except Exception as e:
         print(f"Error occurred: {e}")
         return []
 
 
-#for admin
 def get_users_with_roles():
+    """
+    Get users with roles.
+
+    Returns:
+        list: A list of tuples with user and their role.
+    """
     try:
         users = UserProfile.objects.all()
         users_with_roles = []
@@ -261,65 +338,51 @@ def get_users_with_roles():
             auth_data = Auth.objects.filter(id=user.id).first()
             role = auth_data.role if auth_data else None
             users_with_roles.append((user, role))
-
         return users_with_roles
-
     except Exception as e:
         print(f"Error occurred: {e}")
         return []
 
 
-#EXAMPLE
-# users_with_roles = get_users_with_roles()
-#
-# for user, role in users_with_roles:
-#     print("Name:", user.name)
-#     print("Surname:", user.surname)
-#     print("Email:", user.email)
-#     print("PESEL:", user.pesel)
-#     print("Role:", role)
-#     print("\n")
-
-
-# FOR REPORTS
 def get_landmarks_for_patient(patient_id):
+    """
+    Get landmarks for a patient by patient ID.
+
+    Args:
+        patient_id (int): The ID of the patient.
+
+    Returns:
+        list: A list of distances for specified landmarks.
+    """
     landmark_numbers = [61, 291, 55, 285]
-    # 61 -left mouth corner
-    # 291 - right mouth corner
-    # 55 - left brow (inner corner)
-    # 285 - right brow (inner corner)
-
     try:
-        # Pobierz wszystkie zdjęcia referencyjne dla danego pacjenta
         ref_photos = RefPhotos.objects.filter(patient_id__id=patient_id)
-
-        # Pobierz odległości dla wybranych numerów landmarków
         distances = RefPhotoLandmarks.objects.filter(
             ref_photo__in=ref_photos,
             landmark_number__in=landmark_numbers
         ).values_list('distance', flat=True)
-
-        # Zwróć listę odległości
         return list(distances)
-
     except Exception as e:
-        # Obsługa błędów
         print(f"Error: {e}")
         return None
 
 
-## FOR REPORTS
 def get_data_for_reports(patient_id):
+    """
+    Get data for reports by patient ID.
+
+    Args:
+        patient_id (int): The ID of the patient.
+
+    Returns:
+        tuple: Lists of dates, mouth differences, and second differences.
+    """
     try:
         reports = Reports.objects.filter(patient_id_id=patient_id)
-
         dates = [report.date for report in reports]
         differences_mouth = [report.difference_mouth for report in reports]
         differences_2 = [report.difference_2 for report in reports]
-
         return dates, differences_mouth, differences_2
-
     except Exception as e:
-
         print(f"Error: {e}")
         return [], [], []

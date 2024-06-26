@@ -3,11 +3,9 @@ from enum import Enum
 
 from FaceMotionMonitorApp.models import Role
 
-
 class Sex(Enum):
     MALE = 'male'
     FEMALE = 'female'
-
 
 class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
@@ -37,20 +35,16 @@ class RefPhotos(models.Model):
     patient_id = models.OneToOneField(Patient, on_delete=models.CASCADE, null=True)
 
 class DoctorAndPatient(models.Model):
-
     id = models.AutoField(primary_key=True)
-
     patient_id = models.IntegerField(default=1)
     doctor_id = models.IntegerField(default=1)
 
 class Auth(models.Model):
 
-
     id = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
     login = models.CharField(max_length=100, unique=True, null=True)
     password = models.CharField(max_length=100, null=True)
     role = models.CharField(max_length=10, choices=[(role.value, role.name) for role in Role])
-
 
 class Recordings(models.Model):
     id = models.AutoField(primary_key=True)

@@ -713,14 +713,6 @@ def delete_patient(request, patient_id):
             DoctorAndPatient.objects.filter(patient_id=patient_id).delete()
             UserProfile.objects.filter(id=user_id).delete()
 
-            # Check if the user is also a doctor and delete if exists
-            # doctor = Doctor.objects.filter(user_id=user_id).first()
-            # if doctor:
-            #     doctor_id = doctor.id
-            #     doctor.delete()
-            #     # Delete the assignment from the DoctorAndPatient table
-            #     DoctorAndPatient.objects.filter(doctor_id=doctor_id).delete()
-
             return Response({'message': 'Patient deleted successfully'}, status=200)
 
         else:
@@ -917,13 +909,6 @@ class CreateReportView(APIView):
             file_path = os.path.join(os.getcwd(), x)
             return Response({'error': 'dziala'}, status=status.HTTP_200_OK)
             # Return the PDF file as a response
-            # if os.path.exists(file_path):
-            #     with open(file_path, 'rb') as pdf_file:
-            #         response = FileResponse(pdf_file, content_type='application/pdf')
-            #         response['Content-Disposition'] = f'attachment; filename="{file_name}"'
-            #         return response
-            # else:
-            #     return Response({'error': 'Report generation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

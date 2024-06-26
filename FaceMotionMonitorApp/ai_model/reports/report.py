@@ -1,10 +1,9 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import matplotlib.pyplot as plt
-import numpy as np
 import os
-from datetime import date, datetime, timedelta
-from FaceMotionMonitorApp import services, views
+from datetime import date
+from FaceMotionMonitorApp import services
 
 def make_figures(patient_id):
     # Assuming you want to retrieve data for the last 30 days

@@ -1,19 +1,34 @@
 import cv2
 import mediapipe as mp
 import math
-import numpy as np
 
 mp_face_mesh = mp.solutions.face_mesh
 
+
 class VideoProcessor:
     def __init__(self):
+        """
+        Initialize the VideoProcessor with MediaPipe FaceMesh and landmark connections.
+        """
         self.face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, refine_landmarks=True)
         self.landmark_connections, self.landmarks = self.get_points()
 
     def __del__(self):
+        """
+        Close the FaceMesh instance upon deletion.
+        """
         self.face_mesh.close()
 
     def get_unique(self, c):
+        """
+        Get a list of unique landmarks from connections.
+
+        Parameters:
+        c (list): List of connections (tuples or single values).
+
+        Returns:
+        list: List of unique landmarks.
+        """
         unique_landmarks = set()
         for connection in c:
             if isinstance(connection, tuple):
@@ -23,6 +38,15 @@ class VideoProcessor:
         return list(unique_landmarks)
 
     def face_center(self, points):
+        """
+        Calculate the center of the face based on provided landmarks.
+
+        Parameters:
+        points (list): List of tuples containing landmark index and coordinates.
+
+        Returns:
+        tuple: Center coordinates (x, y).
+        """
         sum_x, sum_y = 0, 0
         for landmark in points:
             landmark_index, landmark_x, landmark_y = landmark
@@ -33,6 +57,12 @@ class VideoProcessor:
         return center_x, center_y
 
     def get_points(self):
+        """
+        Retrieve the points of interest (landmarks) and connections.
+
+        Returns:
+        tuple: Set of landmark connections and list of unique landmarks.
+        """
         connections = [
             mp_face_mesh.FACEMESH_LIPS,
             mp_face_mesh.FACEMESH_LEFT_EYEBROW,
@@ -57,6 +87,15 @@ class VideoProcessor:
         return landmark_connections, landmarks
 
     def iris_width(self, landmark_points):
+        """
+        Calculate the average width of the irises.
+
+        Parameters:
+        landmark_points (list): List of tuples containing landmark index and coordinates.
+
+        Returns:
+        float: Average iris width.
+        """
         left = [469, 471]
         right = [474, 476]
         x_landmarks = {}
@@ -74,6 +113,15 @@ class VideoProcessor:
         return width
 
     def calculate_distance(self, landmark_points):
+        """
+        Calculate the distances of landmarks from the center of the face.
+
+        Parameters:
+        landmark_points (list): List of tuples containing landmark index and coordinates.
+
+        Returns:
+        dict: Dictionary of landmark distances from the center.
+        """
         x_center, y_center = self.face_center(landmark_points)
         width = self.iris_width(landmark_points)
         k = width / 11  # 11 mm - average width of a human iris, k is a scale
@@ -85,8 +133,17 @@ class VideoProcessor:
         return distances
 
     def calculate_distance_mouth(self, landmark_points):
+        """
+        Calculate the distance between the corners of the mouth.
+
+        Parameters:
+        landmark_points (list): List of tuples containing landmark index and coordinates.
+
+        Returns:
+        float: Distance between the mouth corners.
+        """
         width = self.iris_width(landmark_points)
-        k = width / 11 # scale
+        k = width / 11  # scale
         x = []
         y = []
         for landmark in landmark_points:
@@ -98,6 +155,15 @@ class VideoProcessor:
         return distance
 
     def process_frame(self, img):
+        """
+        Process a single frame to detect face landmarks and draw annotations.
+
+        Parameters:
+        img (numpy.ndarray): The input image/frame.
+
+        Returns:
+        tuple: Processed image and its buffer.
+        """
         results = self.face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         if results.multi_face_landmarks:
             for face_landmark in results.multi_face_landmarks:
@@ -114,7 +180,6 @@ class VideoProcessor:
                     landmark_list.append((index, norm_x, norm_y))
 
                 land_list.append(landmark_list)
-                # print(land_list)
                 x_center, y_center = self.face_center(landmark_list)
                 distances = self.calculate_distance(landmark_list)
 
@@ -125,12 +190,19 @@ class VideoProcessor:
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                # print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
-
         ret, buffer = cv2.imencode('.jpg', img)
         return img, buffer.tobytes()
 
     def process_video(self, video_file_path):
+        """
+        Process a video file to detect face landmarks and collect frame data.
+
+        Parameters:
+        video_file_path (str): Path to the input video file.
+
+        Returns:
+        tuple: Dictionary of frame data, frame with max distance, and landmark list.
+        """
         cap = cv2.VideoCapture(video_file_path)
 
         frame_count = 0
@@ -167,7 +239,6 @@ class VideoProcessor:
                         landmark_list.append((index, norm_x, norm_y))
 
                     land_list.append(landmark_list)
-                    # print(land_list)
                     x_center, y_center = self.face_center(landmark_list)
                     distances = self.calculate_distance(landmark_list)
 
@@ -181,13 +252,21 @@ class VideoProcessor:
                         cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                                  (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                    # print(f"Frame center: ({x_center}, {y_center}), Distances: {distances}")
             all_frames_data[frame_count] = frame_data
 
         cap.release()
         return all_frames_data, self.get_max_distance_for_rec(all_frames_data), landmark_list
 
     def capture_photo(self, img):
+        """
+        Capture a photo, detect face landmarks, and draw annotations.
+
+        Parameters:
+        img (numpy.ndarray): The input image.
+
+        Returns:
+        tuple: Processed image, buffer, landmark list, distances, x_center, and y_center.
+        """
         results = self.face_mesh.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         if results.multi_face_landmarks:
             for face_landmark in results.multi_face_landmarks:
@@ -212,12 +291,19 @@ class VideoProcessor:
                     cv2.line(img, (d[conn[0]][0], d[conn[0]][1]),
                              (d[conn[1]][0], d[conn[1]][1]), (0, 0, 255), 1)
 
-                # print(f"Photo center: ({x_center}, {y_center}), Distances: {distances}")
-
         ret, buffer = cv2.imencode('.jpg', img)
         return img, buffer.tobytes(), landmark_list, distances, x_center, y_center
 
     def get_max_distance_for_rec(self, frame_data_list):
+        """
+        Get the frame number with the maximum distance between mouth corners.
+
+        Parameters:
+        frame_data_list (dict): Dictionary of frame data.
+
+        Returns:
+        int: Frame number with the maximum distance.
+        """
         landmark_index = [61, 291]
         max_distance = -1
         frame_number_with_max_distance = None
